@@ -281,7 +281,8 @@
         // 내 메시지는 전송 즉시 로컬에 표시했으므로 서버 에코는 건너뛴다 (말풍선 두 번 뜸 방지)
         if (msg.userId !== myId) showBubble(msg.userId, msg.text);
         if (collapsed && msg.userId !== myId) bumpUnseen();
-        if (NYAN_RE.test(msg.text)) playNyanEvent();
+        // 냥냥 이벤트는 '내가' 보냈을 때만 내 화면에 재생 (남의 화면을 갑자기 덮지 않게)
+        if (msg.userId === myId && NYAN_RE.test(msg.text)) playNyanEvent();
         return;
       }
       if (msg.type === 'typing') { setTyping(msg.userId, msg.isTyping); return; }
