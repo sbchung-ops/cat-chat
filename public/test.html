@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>배치 테스트</title>
+<style>
+  body { background: #E8E4DA; font-family: sans-serif; margin: 12px; }
+  h3 { margin: 10px 0 6px; font-size: 13px; color: #555; }
+  .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+  .cell { text-align: center; }
+  .cell .label { font-size: 9px; color: #777; margin-top: 2px; }
+  .cat-figure { position: relative; margin: 0 auto; }
+  .cat-figure .cat-layer { position: absolute; }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script src="cat.js"></script>
+<script>
+fetch('assets/manifest.json').then(r => r.json()).then(list => {
+  window.CatRender.setCatalog(list);
+  const R = window.CatRender;
+  const out = document.getElementById('out');
+  const cats = R.cats, hats = R.hats, necks = R.necks, others = R.others;
+
+  function section(title, makeChar) {
+    let html = `<h3>${title}</h3><div class="row">`;
+    cats.forEach((c, i) => {
+      const ch = makeChar(c, i);
+      html += `<div class="cell">${R.catHTML(ch)}<div class="label">${c.slug.replace('cat_', '').slice(0, 12)}</div></div>`;
+    });
+    html += '</div>';
+    out.insertAdjacentHTML('beforeend', html);
+  }
+
+  // 0) 같은 모자 통일 — 고양이별 위치 비교용
+  section('비니 통일', (c) => ({ cat: c.slug, hat: 'acc_hat_03_blue_beanie', neck: null, item: null }));
+  section('베레모 통일', (c) => ({ cat: c.slug, hat: 'acc_hat_02_beret', neck: null, item: null }));
+  // 1) 모자: 고양이 16종 × 모자 순환 (귀 가림 확인)
+  section('모자 (귀 가림)', (c, i) => ({ cat: c.slug, hat: hats[i % hats.length].slug, neck: null, item: null }));
+  // 2) 목장식: 같은 장식 통일 — 고양이별 턱선 확인용
+  section('리본 통일', (c) => ({ cat: c.slug, hat: null, neck: 'acc_neck_01_red_bow_tie', item: null }));
+  section('넥타이 통일', (c) => ({ cat: c.slug, hat: null, neck: 'acc_neck_05_blue_necktie', item: null }));
+  // 목장식 순환
+  section('목장식', (c, i) => ({ cat: c.slug, hat: null, neck: necks[i % necks.length].slug, item: null }));
+  // 3) 안경/소품 순환
+  section('소품', (c, i) => ({ cat: c.slug, hat: null, neck: null, item: others[i % others.length].slug }));
+  // 4) 풀셋
+  section('풀셋 (모자+목장식+소품)', (c, i) => ({
+    cat: c.slug,
+    hat: hats[(i + 3) % hats.length].slug,
+    neck: necks[(i + 5) % necks.length].slug,
+    item: others[(i + 7) % others.length].slug,
+  }));
+  document.title = 'ready';
+});
+</script>
+</body>
+</html>

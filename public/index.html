@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐱 냥냥 채팅</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>" />
+  <script>window.addEventListener('error', function (e) { window.__lastError = (e.message || String(e.error)) + ' @ ' + (e.filename || '') + ':' + (e.lineno || ''); });</script>
+</head>
+<body>
+  <div class="overlay" id="overlay">
+
+    <!-- 접속/퇴장 토스트 -->
+    <div class="toast-area" id="toastArea"></div>
+
+    <!-- 고양이들이 서 있는 영역 -->
+    <div class="meadow" id="meadow">
+      <div class="cats-row" id="catsRow"></div>
+    </div>
+
+    <!-- 접었을 때의 작은 손잡이 -->
+    <div class="handle-grip interactive hidden" id="handleGrip" title="잡고 끌어서 이동" aria-label="손잡이 이동">⠿</div>
+    <button class="handle interactive hidden" id="handle" title="펼치기" aria-label="채팅 펼치기">
+      <span class="paw-mark" aria-hidden="true">🐾</span>
+      <span class="handle-badge hidden" id="handleBadge">0</span>
+    </button>
+
+    <!-- 우하단 도크 -->
+    <div class="dock interactive" id="dock">
+      <div class="dock-tools">
+        <span class="dock-status" title="접속 중" aria-label="접속 중인 고양이 수"><span class="online-dot"></span><span id="onlineCount">0</span></span>
+        <span class="dock-sep"></span>
+        <button class="tool-btn customize-tool" id="settingsBtn" title="꾸미기" aria-label="꾸미기">✦</button>
+        <button class="tool-btn quit" id="quitBtn" title="종료" aria-label="종료">×</button>
+      </div>
+      <form class="chat-input" id="chatForm">
+        <input type="text" id="chatInput" maxlength="200" placeholder="여기에 냥냥…" autocomplete="off" />
+        <button type="button" class="chat-paw-toggle" id="collapseBtn" title="접기" aria-label="채팅 접기"><span aria-hidden="true">🐾</span></button>
+      </form>
+    </div>
+
+    <!-- 꾸미기 패널 -->
+    <div class="customizer interactive hidden" id="customizer">
+      <div class="cz-top">
+        <div class="cz-preview" id="czPreview"></div>
+        <div class="cz-top-right">
+          <label class="cz-label">닉네임</label>
+          <input type="text" id="nickEdit" maxlength="10" placeholder="닉네임" autocomplete="off" />
+          <button type="button" id="czRandom" class="cz-random">🎲 랜덤 조합</button>
+        </div>
+      </div>
+
+      <div class="cz-tabs" id="czTabs">
+        <button type="button" class="cz-tab active" data-tab="cat">고양이</button>
+        <button type="button" class="cz-tab" data-tab="hat">모자</button>
+        <button type="button" class="cz-tab" data-tab="neck">목장식</button>
+        <button type="button" class="cz-tab" data-tab="item">소품</button>
+      </div>
+
+      <div class="cz-grid" id="czGrid"></div>
+
+      <div class="cz-actions">
+        <button type="button" id="czClose">닫기</button>
+        <button type="button" id="czSave" class="primary">저장 🐾</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="cat.js"></script>
+  <script src="nyan.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,487 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ink: #4F493F;
+  --ink-soft: #8E8372;
+  --surface: #FFFDF8;
+  --surface-soft: #F7F0E3;
+  --line: #CDBA99;
+  --line-soft: #E3D8C5;
+  --sage: #BFD1A6;
+  --sage-deep: #7C9464;
+  --sky: #B9D0DE;
+  --peach: #F0D2B8;
+  --danger: #B9796B;
+  --ivory: var(--surface);
+  --ivory-2: var(--surface-soft);
+  --accent: #D9C7A6;
+  --accent-deep: #B89C6F;
+  --control-h: 38px;
+  --shadow: 0 8px 24px rgba(89, 72, 48, 0.16);
+}
+
+html, body {
+  height: 100%; width: 100%;
+  overflow: hidden;
+  background: transparent !important;
+  font-family: "Gaegu", "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  color: var(--ink);
+  user-select: none;
+}
+
+.overlay { position: fixed; inset: 0; pointer-events: none; }
+
+/* 몽글몽글 + 스케치: 비대칭 라운드 + 부드러운 그림자 (재사용 클래스) */
+.doodle {
+  border: 2px solid var(--line);
+  border-radius: 235px 15px 225px 20px / 20px 220px 18px 235px;
+  background: var(--ivory);
+  box-shadow: 0 6px 18px rgba(150, 130, 100, 0.18), inset 0 -2px 6px rgba(180, 160, 130, 0.12);
+}
+
+/* ---------- 고양이 영역 ---------- */
+.meadow {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 100%;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.cats-row {
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  gap: 14px; padding: 0 0 8px 30px; /* 우측은 입력 도크 자리 확보 */
+  width: max(0px, calc(100% - 340px)); margin-right: 340px; flex-wrap: nowrap;
+  overflow-x: clip; overflow-y: visible; /* 말풍선은 위로 보이고, 넘치는 고양이만 가로로 잘림 */
+}
+.overlay.collapsed .meadow { display: none; }
+
+/* ---------- 고양이 하나 ---------- */
+.cat {
+  position: relative; text-align: center; flex-shrink: 0; min-width: 0;
+  pointer-events: auto;
+  z-index: 1;
+}
+.cat.speaking { z-index: 5; } /* 최근 발화자의 말풍선이 항상 위에 */
+.cat.enter { animation: cat-enter 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.cat.leave { transition: opacity 0.3s, transform 0.3s; opacity: 0; transform: translateY(24px) scale(0.85); }
+
+.cat::after {
+  content: ""; position: absolute; left: 50%; bottom: 2px;
+  width: 46px; height: 9px; transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(110, 97, 82, 0.2), rgba(110, 97, 82, 0) 70%);
+  z-index: -1;
+}
+
+.cat-figure {
+  position: relative; margin: 0 auto;
+  animation: idle-bob 3.4s ease-in-out infinite;
+  filter: drop-shadow(0 3px 4px rgba(120, 100, 80, 0.22));
+}
+.cat:nth-child(2n) .cat-figure { animation-delay: -1.2s; }
+.cat:nth-child(3n) .cat-figure { animation-delay: -2.3s; }
+.cat-figure .cat-layer { position: absolute; image-rendering: auto; pointer-events: none; }
+
+.cat.speaking .cat-figure {
+  animation: speak-bounce 0.5s ease;
+  filter: drop-shadow(0 0 10px rgba(191, 209, 166, 0.9));
+}
+
+.cat-nick {
+  font-size: 11px; font-weight: 600; color: #6B6B6B;
+  background: rgba(255, 255, 255, 0.92); border: 1px solid #DBDBDB;
+  border-radius: 7px;
+  padding: 1px 8px; display: inline-block; max-width: 108px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  margin-top: 2px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.cat.me .cat-nick { background: #EFF5E4; border-color: #C4D4A8; color: #5A6B45; }
+.cat-nick em { font-style: normal; font-size: 10px; opacity: 0.8; }
+
+/* ---------- 말풍선 (플레인 디자인) ---------- */
+.bubble, .typing-bubble {
+  position: absolute; bottom: calc(100% + 24px); left: 50%; transform: translateX(-50%); /* 모자 높이만큼 띄움 */
+  background: #fff; border: 1px solid #D9D9D9;
+  border-radius: 10px;
+  padding: 6px 10px; font-size: 12.5px; line-height: 1.45; color: #4A4A4A;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* 옆 고양이 영역을 침범하지 않게 한 칸 폭으로 제한 (긴 글은 세로로) */
+  width: max-content; max-width: 100px; word-break: break-word; z-index: 8;
+}
+.bubble::after, .typing-bubble::after {
+  content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: #fff;
+  filter: drop-shadow(0 1px 0 #D9D9D9);
+}
+.bubble.hidden, .typing-bubble.hidden { display: none; }
+.bubble.pop { animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* 맨 왼쪽(내) 고양이: 말풍선이 화면 밖으로 잘리지 않게 왼쪽 정렬 */
+.cat:first-child .bubble, .cat:first-child .typing-bubble { left: -4px; transform: none; }
+.cat:first-child .bubble::after, .cat:first-child .typing-bubble::after { left: 34px; }
+.cat:first-child .bubble.pop { animation: pop-left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.cat.me .bubble { background: #F6FAEF; border-color: #C9D8B0; }
+.cat.me .bubble::after { border-top-color: #F6FAEF; filter: drop-shadow(0 1px 0 #C9D8B0); }
+
+.typing-bubble { padding: 9px 12px; }
+.typing-bubble span {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: #B5B5B5; margin: 0 2px; animation: typing-dot 1.2s infinite;
+}
+.typing-bubble span:nth-child(2) { animation-delay: 0.15s; }
+.typing-bubble span:nth-child(3) { animation-delay: 0.3s; }
+
+/* ---------- 우하단 도크 (툴 + 입력바) ---------- */
+.dock {
+  position: absolute; right: 18px; bottom: 16px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  pointer-events: auto;
+}
+.overlay.collapsed .dock { display: none; }
+
+.dock-tools {
+  display: flex; align-items: center; gap: 6px;
+  min-height: 36px; padding: 4px 7px;
+  border: 1px solid var(--line-soft);
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.94);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  opacity: 0.86;
+  transition: opacity 0.18s, transform 0.18s, border-color 0.18s;
+  transform-origin: bottom right;
+}
+.dock:hover .dock-tools, .dock:focus-within .dock-tools {
+  opacity: 1;
+  border-color: var(--line);
+}
+
+.dock-status {
+  min-width: 42px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 14px;
+  background: #F4F8EF;
+  color: var(--ink);
+  font-size: 12px; font-weight: 800;
+}
+.online-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--sage-deep);
+  box-shadow: 0 0 0 3px rgba(124, 148, 100, 0.14); animation: pulse 2s infinite;
+}
+.dock-sep { width: 1px; height: 20px; background: var(--line-soft); margin: 0 1px; }
+
+.tool-btn {
+  width: 30px; height: 30px; border: 1px solid transparent; border-radius: 15px;
+  background: transparent; color: var(--ink-soft); font-size: 15px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: transform 0.14s, background 0.14s, border-color 0.14s, color 0.14s;
+  line-height: 1;
+}
+.tool-btn:hover {
+  transform: translateY(-1px);
+  background: var(--surface-soft);
+  border-color: var(--line-soft);
+  color: var(--ink);
+}
+.tool-btn:focus-visible, .chat-input button:focus-visible, .handle:focus-visible {
+  outline: 3px solid rgba(124, 148, 100, 0.26);
+  outline-offset: 2px;
+}
+.tool-btn.quit { font-size: 18px; }
+.tool-btn.quit:hover { background: #FBEBE7; border-color: #E7C3BA; color: var(--danger); }
+.tool-btn.customize-tool {
+  background: #F7F0FF;
+  border-color: #E4D6F4;
+  color: #7C6794;
+  font-size: 16px;
+}
+.tool-btn.customize-tool:hover {
+  background: #F1E8FB;
+  border-color: #D7C2EE;
+  color: #66517E;
+}
+
+/* 입력바: 크림 알약 + 안쪽 우측 발바닥 전송 */
+.chat-input {
+  position: relative; display: flex; align-items: center;
+}
+.chat-input input {
+  width: 292px; height: 46px; padding: 0 54px 0 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 23px;
+  font-size: 15px; background: rgba(255, 253, 248, 0.96); color: var(--ink);
+  outline: none; font-family: inherit;
+  box-shadow: var(--shadow);
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+}
+.chat-input input::placeholder { color: var(--ink-soft); opacity: 0.64; }
+.chat-input input:focus {
+  border-color: var(--sage-deep);
+  background: #fff;
+  box-shadow: var(--shadow), 0 0 0 4px rgba(191, 209, 166, 0.24);
+}
+.chat-input input:disabled { opacity: 0.55; }
+.chat-paw-toggle {
+  position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+  width: 36px; height: 36px; border: 1px solid #9CB180; border-radius: 18px;
+  background: #F4F8EF; color: var(--sage-deep); font-size: 16px; font-weight: 800; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.14s, filter 0.14s, box-shadow 0.14s;
+  box-shadow: 0 3px 8px rgba(89, 72, 48, 0.18);
+}
+.chat-paw-toggle:hover:not(:disabled) {
+  transform: translateY(-50%) scale(1.04);
+  filter: brightness(1.04);
+  box-shadow: 0 4px 12px rgba(89, 72, 48, 0.22);
+}
+.chat-paw-toggle:disabled { opacity: 0.5; cursor: default; }
+
+/* ---------- 접힘 손잡이 ---------- */
+.handle {
+  position: absolute; right: 16px; bottom: 14px;
+  width: 48px; height: 48px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 253, 248, 0.96); backdrop-filter: blur(10px);
+  color: var(--sage-deep); font-size: 16px; font-weight: 800; font-family: inherit;
+  cursor: pointer; pointer-events: auto;
+  box-shadow: var(--shadow);
+  transition: transform 0.14s, border-color 0.14s, box-shadow 0.14s;
+}
+.handle:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-deep);
+  box-shadow: 0 10px 26px rgba(89, 72, 48, 0.2);
+}
+
+/* 손잡이 위 이동용 그립: OS 네이티브 창 드래그 (잡고 끌면 창이 통째로 이동) */
+.handle-grip {
+  position: absolute; right: 18px; bottom: 68px;
+  width: 44px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 253, 248, 0.94);
+  color: var(--ink-soft); font-size: 11px; line-height: 1;
+  box-shadow: 0 4px 10px rgba(89, 72, 48, 0.16);
+  pointer-events: auto; cursor: grab;
+  -webkit-app-region: drag;
+  user-select: none;
+  animation: handle-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.handle-grip:active { cursor: grabbing; }
+.handle-grip.hidden { display: none; }
+.handle.hidden { display: none; }
+.paw-mark {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #F4F8EF; border: 1px solid #DDE8D0;
+  font-size: 16px;
+}
+.handle-badge {
+  position: absolute; right: -4px; top: -5px;
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px;
+  background: #FBEBE7; border: 1px solid #E7C3BA;
+  color: var(--ink); font-size: 11px; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.handle-badge.hidden { display: none; }
+.handle.has-new { animation: handle-wiggle 1.4s ease-in-out infinite; }
+
+/* ---------- 꾸미기 패널 ---------- */
+.customizer {
+  position: absolute; right: 16px; bottom: 60px;
+  width: 350px; height: 540px; display: flex; flex-direction: column; /* 탭이 바뀌어도 높이 고정 */
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  background: var(--ivory);
+  box-shadow: 0 18px 42px rgba(89, 72, 48, 0.2);
+  pointer-events: auto; z-index: 30; padding: 14px;
+}
+.customizer.hidden { display: none; }
+
+.cz-top { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+.cz-preview {
+  width: 92px; height: 118px; flex-shrink: 0;
+  display: flex; align-items: flex-end; justify-content: center;
+  border: 1px dashed var(--line); border-radius: 18px;
+  background: var(--ivory-2);
+}
+.cz-preview .cat-figure { animation: none; }
+.cz-preview.pop { animation: preview-pop 0.4s ease; }
+.cz-top-right { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.cz-label { font-size: 11.5px; color: var(--ink-soft); font-weight: 700; }
+.cz-top-right input {
+  height: 36px; padding: 0 12px; border: 1.5px solid var(--line-soft); border-radius: 12px;
+  font-size: 14px; background: #fff; color: var(--ink); outline: none; font-family: inherit;
+}
+.cz-top-right input:focus { border-color: var(--sage-deep); box-shadow: 0 0 0 3px rgba(191, 209, 166, 0.22); }
+.cz-random {
+  height: 36px; padding: 0 12px; border: 1px solid #AAC7D6; border-radius: 12px;
+  background: #E8F3F8; color: var(--ink); font-weight: 800; font-size: 12.5px;
+  cursor: pointer; font-family: inherit; transition: transform 0.14s, filter 0.14s, border-color 0.14s;
+}
+.cz-random:hover { transform: translateY(-1px); filter: brightness(1.03); }
+
+.cz-tabs {
+  display: flex; gap: 4px; margin-bottom: 10px; padding: 4px;
+  border-radius: 14px; background: var(--surface-soft);
+}
+.cz-tab {
+  flex: 1; height: 30px; border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent; color: var(--ink-soft); font-weight: 800; font-size: 12.5px;
+  cursor: pointer; font-family: inherit; transition: background 0.14s, color 0.14s, border-color 0.14s;
+}
+.cz-tab.active { background: #fff; color: var(--sage-deep); border-color: #DDE8D0; box-shadow: 0 1px 4px rgba(89, 72, 48, 0.08); }
+
+.cz-grid {
+  flex: 1; overflow-y: auto; display: grid;
+  grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 4px;
+  align-content: start; /* 항목이 적어도 위에서부터 채움 (높이 고정) */
+}
+.cz-item {
+  position: relative; height: 86px; border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: #fff; cursor: pointer; padding: 5px 3px 3px;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;
+}
+.cz-item:hover { border-color: var(--line); background: #FFFDF8; }
+.cz-item.selected { border-color: var(--sage-deep); background: #F4F8EF; box-shadow: 0 0 0 2px rgba(191, 209, 166, 0.42); }
+.cz-item img { max-width: 100%; height: 56px; object-fit: contain; pointer-events: none; }
+.cz-item .cz-name {
+  font-size: 9.5px; color: var(--ink-soft); font-weight: 700; line-height: 1.1;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  pointer-events: none;
+}
+.cz-item.selected .cz-name { color: #6B8248; }
+.cz-item.none-item { justify-content: center; font-size: 11px; color: var(--ink-soft); font-weight: 700; }
+
+.cz-actions { display: flex; gap: 8px; margin-top: 12px; }
+.cz-actions button {
+  flex: 1; height: 38px; border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: #fff; color: var(--ink); font-weight: 800; font-size: 13px;
+  cursor: pointer; font-family: inherit; transition: transform 0.14s, filter 0.14s, border-color 0.14s;
+}
+.cz-actions button:hover { transform: translateY(-1px); filter: brightness(1.02); border-color: var(--line); }
+.cz-actions button.primary { background: var(--sage); color: #fff; border-color: #9CB180; flex: 1.4; }
+
+/* 스크롤바 */
+.cz-grid::-webkit-scrollbar { width: 8px; }
+.cz-grid::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
+
+/* ---------- 토스트 ---------- */
+.toast-area {
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none;
+}
+.toast {
+  background: var(--ivory); border: 2px solid var(--line); color: var(--ink);
+  font-size: 12.5px; font-weight: 700; padding: 6px 16px;
+  border-radius: 40px 12px 40px 12px / 12px 40px 12px 40px;
+  box-shadow: 0 4px 14px rgba(150, 130, 100, 0.24); animation: toast-in 0.35s ease; white-space: nowrap;
+}
+.toast.join { border-color: #B7CE98; }
+.toast.leave { border-color: var(--accent-deep); }
+.toast.out { transition: opacity 0.5s, transform 0.5s; opacity: 0; transform: translateY(-8px); }
+
+/* ---------- 냥냥 이벤트: 화면 가득 고양이 + 발자국 ---------- */
+.nyan-event {
+  position: fixed; inset: 0;
+  pointer-events: none; /* 업무 클릭 방해 금지 */
+  overflow: hidden; z-index: 50;
+}
+.nyan-paw {
+  position: absolute; font-size: 48px; opacity: 0;
+  transform: rotate(var(--rot, 0deg));
+  animation: nyan-paw 3.2s ease forwards;
+  filter: drop-shadow(0 2px 3px rgba(89, 72, 48, 0.25));
+}
+.nyan-cat {
+  position: absolute; opacity: 0;
+  filter: drop-shadow(0 6px 14px rgba(89, 72, 48, 0.35));
+  will-change: transform, opacity;
+}
+/* 가장자리 빼꼼: 좌우는 X축, 상하는 Y축으로 숨었다가 튀어나옴 */
+.nyan-cat-x { animation: nyan-peek-x 3.2s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
+.nyan-cat-y { animation: nyan-peek-y 3.2s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
+@keyframes nyan-paw {
+  0%   { opacity: 0; transform: scale(0.3) rotate(var(--rot, 0deg)); }
+  10%  { opacity: 0.95; transform: scale(1.2) rotate(var(--rot, 0deg)); }
+  18%  { transform: scale(1) rotate(var(--rot, 0deg)); }
+  72%  { opacity: 0.9; }
+  100% { opacity: 0; transform: scale(1) rotate(var(--rot, 0deg)); }
+}
+@keyframes nyan-peek-x {
+  0%   { opacity: 0; transform: translateX(var(--hide)) rotate(var(--rot, 0deg)); }
+  5%   { opacity: 1; }
+  20%  { transform: translateX(calc(var(--hide) * -0.06)) rotate(var(--rot, 0deg)); } /* 살짝 오버슛 */
+  28%  { transform: translateX(0) rotate(var(--rot, 0deg)); }
+  74%  { opacity: 1; transform: translateX(0) rotate(var(--rot, 0deg)); }
+  100% { opacity: 0; transform: translateX(var(--hide)) rotate(var(--rot, 0deg)); }
+}
+@keyframes nyan-peek-y {
+  0%   { opacity: 0; transform: translateY(var(--hide)) rotate(var(--rot, 0deg)); }
+  5%   { opacity: 1; }
+  20%  { transform: translateY(calc(var(--hide) * -0.06)) rotate(var(--rot, 0deg)); }
+  28%  { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  74%  { opacity: 1; transform: translateY(0) rotate(var(--rot, 0deg)); }
+  100% { opacity: 0; transform: translateY(var(--hide)) rotate(var(--rot, 0deg)); }
+}
+
+/* ---------- 접기/펼치기·꾸미기 전환 ---------- */
+.overlay.ui-exit .meadow, .overlay.ui-exit .dock {
+  animation: overlay-exit 0.2s ease forwards;
+}
+.overlay.ui-enter .meadow, .overlay.ui-enter .dock {
+  animation: overlay-enter 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.handle.pop-in { animation: handle-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.customizer { transform-origin: bottom right; }
+.customizer.cz-in { animation: cz-in 0.26s cubic-bezier(0.34, 1.3, 0.64, 1); }
+.customizer.cz-out { animation: cz-out 0.18s ease forwards; }
+@keyframes overlay-exit {
+  to { opacity: 0; transform: translateY(18px); }
+}
+@keyframes overlay-enter {
+  from { opacity: 0; transform: translateY(18px); }
+}
+@keyframes handle-in {
+  from { opacity: 0; transform: scale(0.5); }
+}
+@keyframes cz-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+}
+@keyframes cz-out {
+  to { opacity: 0; transform: translateY(16px) scale(0.95); }
+}
+
+/* ---------- 애니메이션 ---------- */
+@keyframes idle-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes speak-bounce {
+  0% { transform: translateY(0); } 35% { transform: translateY(-12px) scale(1.05); }
+  70% { transform: translateY(2px) scale(0.98); } 100% { transform: translateY(0); }
+}
+@keyframes cat-enter {
+  0% { opacity: 0; transform: translateY(40px) scale(0.6); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pop {
+  0% { transform: translateX(-50%) scale(0.6); opacity: 0; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+@keyframes pop-left {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes preview-pop { 0% { transform: scale(0.8); } 60% { transform: scale(1.08); } 100% { transform: scale(1); } }
+@keyframes charm-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes typing-dot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(191, 209, 166, 0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(191, 209, 166, 0.12); }
+}
+@keyframes toast-in { 0% { opacity: 0; transform: translateY(-8px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes handle-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); }
+}

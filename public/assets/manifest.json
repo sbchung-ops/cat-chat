@@ -1,0 +1,658 @@
+[
+  {
+    "file": "cats/cat_01_korean_shorthair.png",
+    "slug": "cat_01_korean_shorthair",
+    "name_ko": "코리안 숏헤어",
+    "category": "cats",
+    "source_crop_box": [
+      62,
+      198,
+      192,
+      367
+    ],
+    "size_px": [
+      127,
+      169
+    ]
+  },
+  {
+    "file": "cats/cat_02_american_shorthair.png",
+    "slug": "cat_02_american_shorthair",
+    "name_ko": "아메리칸 숏헤어",
+    "category": "cats",
+    "source_crop_box": [
+      248,
+      188,
+      398,
+      367
+    ],
+    "size_px": [
+      146,
+      173
+    ]
+  },
+  {
+    "file": "cats/cat_03_ragdoll.png",
+    "slug": "cat_03_ragdoll",
+    "name_ko": "랙돌",
+    "category": "cats",
+    "source_crop_box": [
+      438,
+      190,
+      595,
+      367
+    ],
+    "size_px": [
+      156,
+      177
+    ]
+  },
+  {
+    "file": "cats/cat_04_russian_blue.png",
+    "slug": "cat_04_russian_blue",
+    "name_ko": "러시안 블루",
+    "category": "cats",
+    "source_crop_box": [
+      618,
+      188,
+      758,
+      367
+    ],
+    "size_px": [
+      140,
+      177
+    ]
+  },
+  {
+    "file": "cats/cat_05_maine_coon.png",
+    "slug": "cat_05_maine_coon",
+    "name_ko": "메인쿤",
+    "category": "cats",
+    "source_crop_box": [
+      790,
+      182,
+      964,
+      367
+    ],
+    "size_px": [
+      169,
+      185
+    ]
+  },
+  {
+    "file": "cats/cat_06_siamese.png",
+    "slug": "cat_06_siamese",
+    "name_ko": "샴",
+    "category": "cats",
+    "source_crop_box": [
+      1000,
+      190,
+      1132,
+      367
+    ],
+    "size_px": [
+      132,
+      177
+    ]
+  },
+  {
+    "file": "cats/cat_07_scottish_fold.png",
+    "slug": "cat_07_scottish_fold",
+    "name_ko": "스코티시 폴드",
+    "category": "cats",
+    "source_crop_box": [
+      1188,
+      190,
+      1322,
+      367
+    ],
+    "size_px": [
+      134,
+      161
+    ]
+  },
+  {
+    "file": "cats/cat_08_tuxedo.png",
+    "slug": "cat_08_tuxedo",
+    "name_ko": "턱시도",
+    "category": "cats",
+    "source_crop_box": [
+      1355,
+      188,
+      1490,
+      367
+    ],
+    "size_px": [
+      130,
+      179
+    ]
+  },
+  {
+    "file": "cats/cat_09_sphynx.png",
+    "slug": "cat_09_sphynx",
+    "name_ko": "스핑크스",
+    "category": "cats",
+    "source_crop_box": [
+      63,
+      405,
+      183,
+      582
+    ],
+    "size_px": [
+      120,
+      177
+    ]
+  },
+  {
+    "file": "cats/cat_10_persian.png",
+    "slug": "cat_10_persian",
+    "name_ko": "페르시안",
+    "category": "cats",
+    "source_crop_box": [
+      242,
+      400,
+      412,
+      582
+    ],
+    "size_px": [
+      170,
+      181
+    ]
+  },
+  {
+    "file": "cats/cat_11_bombay.png",
+    "slug": "cat_11_bombay",
+    "name_ko": "봄베이",
+    "category": "cats",
+    "source_crop_box": [
+      445,
+      402,
+      583,
+      582
+    ],
+    "size_px": [
+      138,
+      179
+    ]
+  },
+  {
+    "file": "cats/cat_12_norwegian_forest_cat.png",
+    "slug": "cat_12_norwegian_forest_cat",
+    "name_ko": "노르웨이 숲",
+    "category": "cats",
+    "source_crop_box": [
+      612,
+      398,
+      765,
+      582
+    ],
+    "size_px": [
+      153,
+      184
+    ]
+  },
+  {
+    "file": "cats/cat_13_british_shorthair.png",
+    "slug": "cat_13_british_shorthair",
+    "name_ko": "브리티시 숏헤어",
+    "category": "cats",
+    "source_crop_box": [
+      805,
+      400,
+      952,
+      582
+    ],
+    "size_px": [
+      145,
+      179
+    ]
+  },
+  {
+    "file": "cats/cat_14_bengal.png",
+    "slug": "cat_14_bengal",
+    "name_ko": "벵갈",
+    "category": "cats",
+    "source_crop_box": [
+      998,
+      400,
+      1145,
+      582
+    ],
+    "size_px": [
+      147,
+      182
+    ]
+  },
+  {
+    "file": "cats/cat_15_devon_rex.png",
+    "slug": "cat_15_devon_rex",
+    "name_ko": "데본 렉스",
+    "category": "cats",
+    "source_crop_box": [
+      1182,
+      402,
+      1312,
+      582
+    ],
+    "size_px": [
+      123,
+      179
+    ]
+  },
+  {
+    "file": "cats/cat_16_turkish_angora.png",
+    "slug": "cat_16_turkish_angora",
+    "name_ko": "터키시 앙고라",
+    "category": "cats",
+    "source_crop_box": [
+      1350,
+      400,
+      1495,
+      582
+    ],
+    "size_px": [
+      145,
+      181
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_01_chef_hat.png",
+    "slug": "acc_hat_01_chef_hat",
+    "name_ko": "셰프 모자",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      88,
+      668,
+      206,
+      767
+    ],
+    "size_px": [
+      118,
+      99
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_02_beret.png",
+    "slug": "acc_hat_02_beret",
+    "name_ko": "베레모",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      220,
+      682,
+      335,
+      760
+    ],
+    "size_px": [
+      115,
+      78
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_03_blue_beanie.png",
+    "slug": "acc_hat_03_blue_beanie",
+    "name_ko": "파란 비니",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      350,
+      665,
+      470,
+      764
+    ],
+    "size_px": [
+      118,
+      99
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_04_top_hat.png",
+    "slug": "acc_hat_04_top_hat",
+    "name_ko": "탑햇",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      482,
+      670,
+      610,
+      767
+    ],
+    "size_px": [
+      127,
+      97
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_05_straw_hat.png",
+    "slug": "acc_hat_05_straw_hat",
+    "name_ko": "밀짚모자",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      620,
+      682,
+      772,
+      767
+    ],
+    "size_px": [
+      148,
+      85
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_06_aviator_hat.png",
+    "slug": "acc_hat_06_aviator_hat",
+    "name_ko": "파일럿 고글 모자",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      780,
+      686,
+      918,
+      775
+    ],
+    "size_px": [
+      133,
+      89
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_08_ski_helmet.png",
+    "slug": "acc_hat_08_ski_helmet",
+    "name_ko": "스키 헬멧",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      1084,
+      672,
+      1210,
+      775
+    ],
+    "size_px": [
+      126,
+      103
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_09_yellow_hard_hat.png",
+    "slug": "acc_hat_09_yellow_hard_hat",
+    "name_ko": "노란 안전모",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      1230,
+      685,
+      1340,
+      765
+    ],
+    "size_px": [
+      110,
+      80
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_10_red_cap.png",
+    "slug": "acc_hat_10_red_cap",
+    "name_ko": "빨간 캡",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      1350,
+      685,
+      1465,
+      765
+    ],
+    "size_px": [
+      115,
+      76
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_11_flower.png",
+    "slug": "acc_hat_11_flower",
+    "name_ko": "꽃",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      686,
+      940,
+      758,
+      996
+    ],
+    "size_px": [
+      72,
+      56
+    ]
+  },
+  {
+    "file": "accessories/other/acc_other_01_round_glasses.png",
+    "slug": "acc_other_01_round_glasses",
+    "name_ko": "동그란 안경",
+    "category": "accessories/other",
+    "source_crop_box": [
+      104,
+      920,
+      216,
+      990
+    ],
+    "size_px": [
+      112,
+      66
+    ]
+  },
+  {
+    "file": "accessories/other/acc_other_02_monocle.png",
+    "slug": "acc_other_02_monocle",
+    "name_ko": "외알 안경",
+    "category": "accessories/other",
+    "source_crop_box": [
+      254,
+      918,
+      335,
+      994
+    ],
+    "size_px": [
+      75,
+      71
+    ]
+  },
+  {
+    "file": "accessories/other/acc_other_03_mustache.png",
+    "slug": "acc_other_03_mustache",
+    "name_ko": "콧수염",
+    "category": "accessories/other",
+    "source_crop_box": [
+      374,
+      936,
+      478,
+      982
+    ],
+    "size_px": [
+      101,
+      45
+    ]
+  },
+  {
+    "file": "accessories/other/acc_other_06_sprout_pot.png",
+    "slug": "acc_other_06_sprout_pot",
+    "name_ko": "새싹 화분",
+    "category": "accessories/other",
+    "source_crop_box": [
+      832,
+      926,
+      912,
+      1000
+    ],
+    "size_px": [
+      75,
+      74
+    ]
+  },
+  {
+    "file": "accessories/other/acc_other_07_carrot.png",
+    "slug": "acc_other_07_carrot",
+    "name_ko": "당근",
+    "category": "accessories/other",
+    "source_crop_box": [
+      1000,
+      918,
+      1076,
+      998
+    ],
+    "size_px": [
+      72,
+      80
+    ]
+  },
+  {
+    "file": "accessories/other/acc_other_08_star.png",
+    "slug": "acc_other_08_star",
+    "name_ko": "별",
+    "category": "accessories/other",
+    "source_crop_box": [
+      1145,
+      925,
+      1222,
+      996
+    ],
+    "size_px": [
+      77,
+      70
+    ]
+  },
+  {
+    "file": "accessories/other/acc_other_09_heart.png",
+    "slug": "acc_other_09_heart",
+    "name_ko": "하트",
+    "category": "accessories/other",
+    "source_crop_box": [
+      1278,
+      925,
+      1352,
+      985
+    ],
+    "size_px": [
+      72,
+      59
+    ]
+  },
+  {
+    "file": "accessories/neck/acc_neck_01_red_bow_tie.png",
+    "slug": "acc_neck_01_red_bow_tie",
+    "name_ko": "빨간 리본 넥타이",
+    "category": "accessories/neck",
+    "source_crop_box": [
+      90,
+      812,
+      190,
+      888
+    ],
+    "size_px": [
+      100,
+      67
+    ]
+  },
+  {
+    "file": "accessories/neck/acc_neck_02_orange_necktie.png",
+    "slug": "acc_neck_02_orange_necktie",
+    "name_ko": "주황 넥타이",
+    "category": "accessories/neck",
+    "source_crop_box": [
+      245,
+      810,
+      307,
+      895
+    ],
+    "size_px": [
+      57,
+      85
+    ]
+  },
+  {
+    "file": "accessories/neck/acc_neck_03_green_bow_tie.png",
+    "slug": "acc_neck_03_green_bow_tie",
+    "name_ko": "초록 리본 넥타이",
+    "category": "accessories/neck",
+    "source_crop_box": [
+      345,
+      815,
+      450,
+      882
+    ],
+    "size_px": [
+      101,
+      61
+    ]
+  },
+  {
+    "file": "accessories/neck/acc_neck_05_blue_necktie.png",
+    "slug": "acc_neck_05_blue_necktie",
+    "name_ko": "파란 넥타이",
+    "category": "accessories/neck",
+    "source_crop_box": [
+      620,
+      812,
+      715,
+      895
+    ],
+    "size_px": [
+      94,
+      75
+    ]
+  },
+  {
+    "file": "accessories/neck/acc_neck_08_purple_bow.png",
+    "slug": "acc_neck_08_purple_bow",
+    "name_ko": "보라 리본",
+    "category": "accessories/neck",
+    "source_crop_box": [
+      1030,
+      814,
+      1122,
+      885
+    ],
+    "size_px": [
+      86,
+      66
+    ]
+  },
+  {
+    "file": "accessories/neck/acc_neck_10_blue_bell_bow.png",
+    "slug": "acc_neck_10_blue_bell_bow",
+    "name_ko": "파란 방울 리본",
+    "category": "accessories/neck",
+    "source_crop_box": [
+      1280,
+      812,
+      1418,
+      888
+    ],
+    "size_px": [
+      138,
+      65
+    ]
+  },
+  {
+    "file": "accessories/hats/acc_hat_12_wizard_hat.png",
+    "slug": "acc_hat_12_wizard_hat",
+    "name_ko": "마법사 모자",
+    "category": "accessories/hats",
+    "source_crop_box": [
+      234,
+      299,
+      998,
+      899
+    ],
+    "size_px": [
+      220,
+      173
+    ]
+  },
+  {
+    "file": "accessories/other/acc_other_10_broom.png",
+    "slug": "acc_other_10_broom",
+    "name_ko": "빗자루",
+    "category": "accessories/other",
+    "source_crop_box": [
+      265,
+      227,
+      977,
+      1006
+    ],
+    "size_px": [
+      201,
+      220
+    ]
+  }
+]

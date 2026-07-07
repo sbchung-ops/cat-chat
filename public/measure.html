@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>measuring</title></head>
+<body>
+<pre id="out">measuring...</pre>
+<script>
+// 고양이 PNG 실루엣 + 눈동자 픽셀을 측정해 머리 기하 정보를 계산한다.
+async function measure() {
+  const list = await (await fetch('assets/manifest.json')).json();
+  const cats = list.filter(x => x.category === 'cats');
+  const result = {};
+
+  for (const cat of cats) {
+    const img = new Image();
+    img.src = 'assets/' + cat.file;
+    await img.decode();
+    const W = img.naturalWidth, H = img.naturalHeight;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0);
+    const d = ctx.getImageData(0, 0, W, H).data;
+    const A = (x, y) => d[(y * W + x) * 4 + 3];
+
+    // 행별 실루엣 세그먼트(runs)
+    const rows = [];
+    let y0 = -1, y1 = -1, maxW = 0;
+    for (let y = 0; y < H; y++) {
+      const runs = [];
+      let start = -1;
+      for (let x = 0; x < W; x++) {
+        const on = A(x, y) > 40;
+        if (on && start < 0) start = x;
+        if (!on && start >= 0) { runs.push([start, x - 1]); start = -1; }
+      }
+      if (start >= 0) runs.push([start, W - 1]);
+      let L = -1, R = -1, w = 0;
+      if (runs.length) { L = runs[0][0]; R = runs[runs.length - 1][1]; w = R - L + 1; }
+      rows.push({ runs, L, R, w });
+      if (w > 0) { if (y0 < 0) y0 = y; y1 = y; if (w > maxW) maxW = w; }
+    }
+
+    // 귀 밑: 위에서부터 "두 갈래(귀 2개)"였다가 처음으로 넓은 한 덩어리가 되는 행
+    let earBase = -1;
+    let sawTwoRuns = false;
+    for (let y = y0; y <= y1; y++) {
+      const meaningful = rows[y].runs.filter(r => r[1] - r[0] > 2);
+      if (meaningful.length >= 2) sawTwoRuns = true;
+      if (sawTwoRuns && meaningful.length === 1 && rows[y].w >= 0.4 * maxW) { earBase = y; break; }
+    }
+    if (earBase < 0) { // 접힌 귀 등: 폭 임계값으로 대체
+      for (let y = y0; y <= y1; y++) if (rows[y].w >= 0.5 * maxW) { earBase = y; break; }
+    }
+
+    // 눈높이: 귀 밑보다 살짝 아래부터, 얼굴 "중앙부"의 어두운 픽셀(눈동자)이 가장 많은 행
+    // (윤곽선은 실루엣 가장자리에 있으므로 중앙 60%만 세면 눈만 잡힌다)
+    const bboxH = y1 - y0 + 1;
+    const zoneStart = Math.round(earBase + 0.05 * bboxH);
+    const zoneEnd = Math.min(y1, Math.round(earBase + 0.35 * bboxH));
+    let eyeY = -1, best = 0;
+    for (let y = zoneStart; y <= zoneEnd; y++) {
+      const row = rows[y];
+      if (row.w <= 0) continue;
+      const xa = Math.round(row.L + 0.2 * row.w);
+      const xb = Math.round(row.R - 0.2 * row.w);
+      let c = 0;
+      for (let x = xa; x <= xb; x++) {
+        const i = (y * W + x) * 4;
+        if (d[i + 3] > 200 && d[i] + d[i + 1] + d[i + 2] < 260) c++;
+      }
+      if (c > best) { best = c; eyeY = y; }
+    }
+    if (eyeY < 0 || best < 4) eyeY = Math.round(earBase + 0.18 * bboxH);
+
+    // 머리 폭/중심: 눈높이 행의 실루엣
+    const er = rows[eyeY];
+    const headW = er.w, headCx = (er.L + er.R) / 2;
+
+    result[cat.slug] = {
+      earTop: +(y0 / H).toFixed(4),
+      faceTop: +(earBase / H).toFixed(4),
+      eyeY: +(eyeY / H).toFixed(4),
+      headW: +(headW / W).toFixed(4),
+      headCx: +(headCx / W).toFixed(4),
+      bboxBottom: +(y1 / H).toFixed(4),
+    };
+  }
+  document.getElementById('out').textContent = JSON.stringify(result);
+  document.title = 'done';
+}
+measure();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "cat-chat",
+  "version": "1.0.0",
+  "description": "바탕화면 하단 고정형 고양이 실시간 채팅 데스크톱 오버레이",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "node server.js",
+    "desktop": "electron .",
+    "server": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11"
+  }
+}
