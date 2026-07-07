@@ -52,8 +52,10 @@
     root.className = 'cat' + (user.userId === myId ? ' me' : '') + (animate ? ' enter' : '');
     root.dataset.userId = user.userId;
     root.innerHTML = `
-      <div class="bubble hidden"><span class="bubble-text"></span></div>
-      <div class="typing-bubble hidden"><span></span><span></span><span></span></div>
+      <div class="bubble-area">
+        <div class="typing-bubble hidden"><span></span><span></span><span></span></div>
+        <div class="bubble hidden"><span class="bubble-text"></span></div>
+      </div>
       ${window.CatRender.catHTML(user.character)}
       <div class="cat-nick">${escapeHtml(user.nickname)}${user.userId === myId ? ' <em>(나)</em>' : ''}</div>
     `;
@@ -115,8 +117,8 @@
   function setTyping(userId, isTyping) {
     const el = catEls.get(userId);
     if (!el) return;
+    // 말풍선은 그대로 두고 입력 중 표시만 위에 겹쳐 쌓는다 (직전 채팅이 가려지지 않게)
     el.typingBubble.classList.toggle('hidden', !isTyping);
-    if (isTyping) el.bubble.classList.add('hidden');
   }
 
   // ---- 냥냥 이벤트: 채팅에 '냥냥'이 나오면 화면 가득 고양이 + 발자국 ----
