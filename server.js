@@ -130,9 +130,13 @@ function broadcast(payload, exceptWs) {
 }
 
 const wss = new WebSocketServer({ server });
+// 프록시(Render/Cloudflare) 뒤에서는 소켓이 거칠게 끊기며 error 이벤트가 흔하다.
+// 리스너가 없으면 Node가 프로세스를 통째로 죽이므로 반드시 삼켜준다.
+wss.on('error', (e) => console.error('[wss]', e.message));
 
 wss.on('connection', (ws) => {
   let userId = null;
+  ws.on('error', (e) => console.error('[ws]', e.message));
 
   ws.on('message', (raw) => {
     let data;
