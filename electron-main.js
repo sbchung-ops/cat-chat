@@ -70,8 +70,23 @@ function createWindow() {
 
   if (DEBUG) win.webContents.openDevTools({ mode: 'detach' });
 
-  win.webContents.on('did-finish-load', () => console.log('[overlay] did-finish-load'));
-  win.webContents.on('did-fail-load', (_e, code, desc) => console.error('[overlay] did-fail-load', code, desc));
+  // 서버가 잠들었거나(무료 플랜) 배포 중이면 404/실패 페이지가 로드된 채 멈춘다 → 앱 페이지가 아닐 때 재시도
+  async function ensureAppLoaded() {
+    if (!win) return;
+    let ok = false;
+    try {
+      ok = await win.webContents.executeJavaScript('!!(window.CatRender && document.getElementById("overlay"))', true);
+    } catch { /* 페이지가 죽어 있으면 실패 */ }
+    if (!ok) {
+      console.warn('[overlay] 앱 페이지가 아님 — 5초 후 재시도');
+      setTimeout(() => { if (win) win.loadURL(BASE_URL); }, 5000);
+    }
+  }
+  win.webContents.on('did-finish-load', () => { console.log('[overlay] did-finish-load'); ensureAppLoaded(); });
+  win.webContents.on('did-fail-load', (_e, code, desc) => {
+    console.error('[overlay] did-fail-load', code, desc);
+    setTimeout(() => { if (win) win.loadURL(BASE_URL); }, 5000);
+  });
   win.webContents.on('render-process-gone', (_e, d) => console.error('[overlay] render-process-gone', JSON.stringify(d)));
   win.webContents.on('console-message', (_e, level, message) => console.log('[renderer]', message));
 
