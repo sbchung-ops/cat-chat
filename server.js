@@ -134,8 +134,20 @@ const wss = new WebSocketServer({ server });
 // 리스너가 없으면 Node가 프로세스를 통째로 죽이므로 반드시 삼켜준다.
 wss.on('error', (e) => console.error('[wss]', e.message));
 
+// 죽은 연결 정리: 30초마다 ping, 응답 없으면 끊는다
+// (거칠게 끊긴 클라이언트는 close 이벤트가 한참 늦게 와서 유령 고양이로 남는다)
+setInterval(() => {
+  for (const u of users.values()) {
+    if (u.ws.isAlive === false) { u.ws.terminate(); continue; }
+    u.ws.isAlive = false;
+    try { u.ws.ping(); } catch { /* 이미 죽은 소켓 */ }
+  }
+}, 30000);
+
 wss.on('connection', (ws) => {
   let userId = null;
+  ws.isAlive = true;
+  ws.on('pong', () => { ws.isAlive = true; });
   ws.on('error', (e) => console.error('[ws]', e.message));
 
   ws.on('message', (raw) => {
