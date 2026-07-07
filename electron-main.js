@@ -2,9 +2,10 @@ const { app, BrowserWindow, screen, ipcMain, Tray, Menu, nativeImage } = require
 const path = require('path');
 
 // CATCHAT_SERVER가 설정되면 원격 서버(배포된 PoC 서버)에 접속하고 로컬 서버는 띄우지 않는다.
-// 패키징된 배포 앱은 기본으로 Vercel PoC 서버에 붙는다.
-// 예: $env:CATCHAT_SERVER="https://cat-chat-navy.vercel.app"; npm run desktop
-const DEFAULT_REMOTE_URL = 'https://cat-chat-navy.vercel.app';
+// 패키징된 배포 앱은 기본으로 Render PoC 서버에 붙는다.
+// (Vercel은 서버리스 인스턴스가 나뉘면 유저끼리 서로 안 보여서 상시 프로세스인 Render 사용)
+// 예: $env:CATCHAT_SERVER="https://cat-chat-y05q.onrender.com"; npm run desktop
+const DEFAULT_REMOTE_URL = 'https://cat-chat-y05q.onrender.com';
 const REMOTE_URL = (process.env.CATCHAT_SERVER || (app.isPackaged ? DEFAULT_REMOTE_URL : '')).replace(/\/$/, '');
 let server = null;
 let BASE_URL = REMOTE_URL;

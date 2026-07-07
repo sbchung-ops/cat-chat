@@ -38,11 +38,15 @@ npm run desktop  # 바탕화면 오버레이 실행
 2. **New → Blueprint** → 이 저장소(`cat-chat`) 선택 → Apply
 3. 빌드가 끝나면 `https://cat-chat-xxxx.onrender.com` 형태의 URL이 생깁니다
 
+현재 PoC 서버: `https://cat-chat-y05q.onrender.com`
+
 친구들이 참여하는 방법:
+- **설치형 앱 (권장)**: `냥냥채팅-설치.exe` 실행 → 자동 설치 후 실행, 서버에 자동 접속
+  (빌드: `npm run pack:win` 또는 `npx electron-builder --win nsis`)
 - **브라우저**: 배포 URL을 그냥 열면 됩니다 (설치 불필요)
-- **데스크톱 오버레이**: 이 저장소를 받아 `npm install` 후
+- **개발 모드로 원격 서버 접속**:
   ```powershell
-  $env:CATCHAT_SERVER="https://cat-chat-xxxx.onrender.com"; npm run desktop
+  $env:CATCHAT_SERVER="https://cat-chat-y05q.onrender.com"; npm run desktop
   ```
 
 참고: Render 무료 플랜은 15분간 접속이 없으면 잠들었다가 첫 접속 시 ~30초 걸려 깨어납니다.
