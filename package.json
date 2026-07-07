@@ -34,6 +34,7 @@
       "!public/.gstack/**/*"
     ],
     "asar": true,
+    "afterPack": "./build/after-pack.js",
     "win": {
       "target": [
         "portable",
@@ -41,10 +42,12 @@
       ]
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
+      "oneClick": true,
+      "perMachine": false,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "artifactName": "냥냥채팅-설치.exe"
     }
   }
 }
