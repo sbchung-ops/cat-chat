@@ -79,7 +79,8 @@ html, body {
 .cat-figure .cat-layer { position: absolute; image-rendering: auto; pointer-events: none; }
 
 .cat.speaking .cat-figure {
-  animation: speak-bounce 0.5s ease;
+  /* speak-bounce가 끝나면(0.5s) idle-bob이 이어져 말하는 동안에도 둥실둥실 유지 */
+  animation: idle-bob 3.4s ease-in-out infinite, speak-bounce 0.5s ease;
   filter: drop-shadow(0 0 10px rgba(191, 209, 166, 0.9));
 }
 
@@ -233,8 +234,15 @@ html, body {
 .chat-paw-toggle:disabled { opacity: 0.5; cursor: default; }
 
 /* ---------- 접힘 손잡이 ---------- */
-.handle {
+.handle-wrap {
   position: absolute; right: 16px; bottom: 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  pointer-events: auto;
+}
+.handle-wrap.hidden { display: none; }
+
+.handle {
+  position: relative;
   width: 48px; height: 48px; padding: 0;
   display: flex; align-items: center; justify-content: center;
   border: 1.5px solid var(--line);
@@ -251,9 +259,8 @@ html, body {
   box-shadow: 0 10px 26px rgba(89, 72, 48, 0.2);
 }
 
-/* 손잡이 위 이동용 그립: OS 네이티브 창 드래그 (잡고 끌면 창이 통째로 이동) */
+/* 손잡이 위 이동용 그립: 잡고 끌면 손잡이가 화면 안에서 이동 (창은 고정) */
 .handle-grip {
-  position: absolute; right: 18px; bottom: 68px;
   width: 44px; height: 18px;
   display: flex; align-items: center; justify-content: center;
   border: 1.5px solid var(--line);
@@ -261,13 +268,11 @@ html, body {
   background: rgba(255, 253, 248, 0.94);
   color: var(--ink-soft); font-size: 11px; line-height: 1;
   box-shadow: 0 4px 10px rgba(89, 72, 48, 0.16);
-  pointer-events: auto; cursor: grab;
-  -webkit-app-region: drag;
-  user-select: none;
+  cursor: grab;
+  user-select: none; touch-action: none;
   animation: handle-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .handle-grip:active { cursor: grabbing; }
-.handle-grip.hidden { display: none; }
 .handle.hidden { display: none; }
 .paw-mark {
   width: 34px; height: 34px; border-radius: 50%;
@@ -371,7 +376,8 @@ html, body {
 
 /* ---------- 토스트 ---------- */
 .toast-area {
-  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  /* 창이 화면 전체 크기라 top 기준이면 화면 꼭대기에 뜸 → 고양이 위쪽에 고정 */
+  position: absolute; bottom: 290px; left: 50%; transform: translateX(-50%);
   display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none;
 }
 .toast {

@@ -1,0 +1,16 @@
+{
+  "services": {
+    "cat-chat": {
+      "root": ".",
+      "entrypoint": "vercel-server.mjs",
+      "functions": {
+        "api/ws.js": {
+          "maxDuration": 800
+        }
+      }
+    }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": { "service": "cat-chat" } }
+  ]
+}

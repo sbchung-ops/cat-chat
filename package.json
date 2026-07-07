@@ -6,12 +6,45 @@
   "scripts": {
     "start": "node server.js",
     "desktop": "electron .",
-    "server": "node server.js"
+    "server": "node server.js",
+    "pack:win": "electron-builder --win portable",
+    "dist:win": "electron-builder --win nsis portable"
   },
   "dependencies": {
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "electron": "^33.4.11"
+    "electron": "^33.4.11",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.mobidays.catchat",
+    "productName": "냥냥 채팅",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron-main.js",
+      "preload.js",
+      "server.js",
+      "public/**/*",
+      "package.json",
+      "!**/H7WIWU2.DOCX",
+      "!_qa_*.png",
+      "!public/.gstack/**/*"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }

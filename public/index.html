@@ -19,12 +19,14 @@
       <div class="cats-row" id="catsRow"></div>
     </div>
 
-    <!-- 접었을 때의 작은 손잡이 -->
-    <div class="handle-grip interactive hidden" id="handleGrip" title="잡고 끌어서 이동" aria-label="손잡이 이동">⠿</div>
-    <button class="handle interactive hidden" id="handle" title="펼치기" aria-label="채팅 펼치기">
-      <span class="paw-mark" aria-hidden="true">🐾</span>
-      <span class="handle-badge hidden" id="handleBadge">0</span>
-    </button>
+    <!-- 접었을 때의 작은 손잡이 (그립을 잡고 끌면 화면 어디로든 이동) -->
+    <div class="handle-wrap interactive hidden" id="handleWrap">
+      <div class="handle-grip" id="handleGrip" title="잡고 끌어서 이동" aria-label="손잡이 이동">⠿</div>
+      <button class="handle" id="handle" title="펼치기" aria-label="채팅 펼치기">
+        <span class="paw-mark" aria-hidden="true">🐾</span>
+        <span class="handle-badge hidden" id="handleBadge">0</span>
+      </button>
+    </div>
 
     <!-- 우하단 도크 -->
     <div class="dock interactive" id="dock">

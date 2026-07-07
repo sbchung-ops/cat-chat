@@ -199,9 +199,16 @@ wss.on('connection', (ws) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`🐱 cat-chat server running: http://localhost:${PORT}`);
-});
+function start(port = PORT) {
+  if (!server.listening) {
+    server.listen(port, () => {
+      console.log(`🐱 cat-chat server running: http://localhost:${port}`);
+    });
+  }
+  return server;
+}
+
+if (require.main === module || process.versions.electron) start();
 
 // Electron 메인 프로세스에서 require 시 서버 인스턴스 재사용
-module.exports = { server, PORT };
+module.exports = { server, PORT, start };

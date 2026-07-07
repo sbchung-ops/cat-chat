@@ -14,6 +14,7 @@
   const settingsBtn = $('settingsBtn');
   const collapseBtn = $('collapseBtn');
   const handle = $('handle');
+  const handleWrap = $('handleWrap');
   const handleGrip = $('handleGrip');
   const handleBadge = $('handleBadge');
   const customizer = $('customizer');
@@ -32,11 +33,6 @@
 
   let collapsed = false;
   let unseen = 0;
-
-  // ---- Electron 창 모드 ----
-  function setMode(mode) {
-    if (OVERLAY && window.overlayAPI.mode) window.overlayAPI.mode(mode);
-  }
 
   // ---- 프로필 ----
   function loadProfile() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
@@ -136,11 +132,8 @@
   }
 
   function playNyanEvent() {
-    if (collapsed) return; // 접힌 상태면 생략
-    // 오버레이: 전용 투명 이벤트 창에서 재생 (본 창은 리사이즈하지 않아 화면이 튀지 않음)
-    if (OVERLAY && window.overlayAPI.nyan) { window.overlayAPI.nyan(); return; }
-    // 브라우저: 이 페이지 안에서 직접 재생
-    if (nyanLayer) return;
+    if (collapsed || nyanLayer) return; // 접힌 상태거나 재생 중이면 생략
+    // 창이 화면 전체 크기로 고정되어 있어 이 페이지 안에서 바로 화면 가득 재생된다
     nyanLayer = window.NyanFX.build(window.CatRender.cats);
     overlay.appendChild(nyanLayer);
     nyanTimer = setTimeout(cancelNyanEvent, window.NyanFX.TOTAL_MS);
@@ -158,15 +151,14 @@
   }
 
   // ---- 접기 / 펼치기 ----
-  // 화면 튐 방지: 커질 때는 창을 먼저 키우고 내용을 등장시키고,
-  // 작아질 때는 퇴장 애니메이션이 끝난 뒤 창을 줄인다.
+  // 창 크기는 고정이고 DOM 전환만 일어난다: 퇴장 애니메이션 → 표시 전환 → 등장 애니메이션
   const UI_EXIT_MS = 200, UI_ENTER_MS = 320;
   let uiAnimTimer = null;
 
   function collapse() {
     if (collapsed) return;
     collapsed = true;
-    cancelNyanEvent(); // 접으면 이벤트도 정리 (창 크기 복원 충돌 방지)
+    cancelNyanEvent(); // 접으면 이벤트도 정리
     closeCustomizer(true); // 접힘이 우선: 꾸미기는 즉시 숨김
     overlay.classList.remove('ui-enter');
     overlay.classList.add('ui-exit');
@@ -175,40 +167,22 @@
       if (!collapsed) return; // 애니메이션 중 다시 펼친 경우
       overlay.classList.remove('ui-exit');
       overlay.classList.add('collapsed');
-      handle.classList.remove('hidden');
+      handleWrap.classList.remove('hidden');
       handle.classList.add('pop-in');
-      handleGrip.classList.remove('hidden');
-      setMode('collapsed');
     }, UI_EXIT_MS);
   }
   function expand() {
     if (!collapsed) return;
     collapsed = false;
     clearTimeout(uiAnimTimer);
-    setMode('normal'); // 창을 먼저 키운다
-    handle.classList.add('hidden');
+    handleWrap.classList.add('hidden');
     handle.classList.remove('pop-in');
-    handleGrip.classList.add('hidden');
     unseen = 0;
     handleBadge.classList.add('hidden');
     handle.classList.remove('has-new');
-    // 창 리사이즈가 끝난 다음에 내용을 드러낸다
-    // (작은 접힘 창 안에 고양이들이 한 프레임 그려졌다가 튀는 문제 방지)
-    let revealed = false;
-    const reveal = () => {
-      if (revealed || collapsed) return;
-      revealed = true;
-      window.removeEventListener('resize', reveal);
-      overlay.classList.remove('ui-exit', 'collapsed');
-      overlay.classList.add('ui-enter');
-      uiAnimTimer = setTimeout(() => overlay.classList.remove('ui-enter'), UI_ENTER_MS);
-    };
-    if (OVERLAY) {
-      window.addEventListener('resize', reveal);
-      setTimeout(reveal, 150); // resize 이벤트 유실 대비
-    } else {
-      reveal();
-    }
+    overlay.classList.remove('ui-exit', 'collapsed');
+    overlay.classList.add('ui-enter');
+    uiAnimTimer = setTimeout(() => overlay.classList.remove('ui-enter'), UI_ENTER_MS);
   }
   function bumpUnseen() {
     unseen += 1;
@@ -223,10 +197,54 @@
 
   handle.addEventListener('click', expand);
 
+  // ---- 접힘 손잡이 이동: 그립(⠿)을 잡고 끌면 손잡이가 화면 안에서 이동 (창은 고정) ----
+  const HANDLE_POS_KEY = 'cat-chat-handle-pos';
+  let handleDragging = false; // 드래그 중 클릭 통과 토글이 이벤트를 끊지 않게 공유
+  let handlePos = null;
+  try { handlePos = JSON.parse(localStorage.getItem(HANDLE_POS_KEY)); } catch { /* 기본 위치 */ }
+
+  function applyHandlePos() {
+    if (!handlePos) return;
+    const w = handleWrap.offsetWidth || 56, h = handleWrap.offsetHeight || 84;
+    const x = Math.min(Math.max(handlePos.x, 4), window.innerWidth - w - 4);
+    const y = Math.min(Math.max(handlePos.y, 4), window.innerHeight - h - 4);
+    handleWrap.style.left = x + 'px';
+    handleWrap.style.top = y + 'px';
+    handleWrap.style.right = 'auto';
+    handleWrap.style.bottom = 'auto';
+  }
+  applyHandlePos();
+  window.addEventListener('resize', applyHandlePos);
+
+  let gripDrag = null;
+  function endGripDrag() {
+    if (!gripDrag) return;
+    gripDrag = null;
+    handleDragging = false;
+    if (handlePos) localStorage.setItem(HANDLE_POS_KEY, JSON.stringify(handlePos));
+  }
+  handleGrip.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    const r = handleWrap.getBoundingClientRect();
+    gripDrag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+    handleDragging = true;
+    if (OVERLAY) window.overlayAPI.setIgnore(false); // 드래그 동안은 이벤트를 항상 받는다
+    handleGrip.setPointerCapture(e.pointerId);
+  });
+  handleGrip.addEventListener('pointermove', (e) => {
+    if (!gripDrag) return;
+    if (e.buttons === 0) return endGripDrag(); // 뗌 신호를 놓쳤어도 복구
+    handlePos = { x: e.clientX - gripDrag.dx, y: e.clientY - gripDrag.dy };
+    applyHandlePos();
+  });
+  handleGrip.addEventListener('pointerup', endGripDrag);
+  handleGrip.addEventListener('pointercancel', endGripDrag);
+
   // ---- WebSocket ----
   function connect() {
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    ws = new WebSocket(`${proto}://${location.host}`);
+    const wsPath = window.CATCHAT_WS_PATH || (location.hostname.endsWith('vercel.app') ? '/api/ws' : '');
+    ws = new WebSocket(`${proto}://${location.host}${wsPath}`);
 
     ws.addEventListener('open', () => {
       ws.send(JSON.stringify({ type: 'join', nickname: profile.nickname, character: profile.character }));
@@ -258,7 +276,8 @@
       if (msg.type === 'user-joined') { addCat(msg.user, true); toast(`${msg.user.nickname} 냥이가 놀러왔어요`, 'join'); return; }
       if (msg.type === 'user-left') { removeCat(msg.userId); toast(`${msg.nickname} 냥이가 떠났어요`, 'leave'); return; }
       if (msg.type === 'chat') {
-        showBubble(msg.userId, msg.text);
+        // 내 메시지는 전송 즉시 로컬에 표시했으므로 서버 에코는 건너뛴다 (말풍선 두 번 뜸 방지)
+        if (msg.userId !== myId) showBubble(msg.userId, msg.text);
         if (collapsed && msg.userId !== myId) bumpUnseen();
         if (NYAN_RE.test(msg.text)) playNyanEvent();
         return;
@@ -371,7 +390,6 @@
     nickEdit.value = profile.nickname || '';
     activeTab = 'cat';
     czTabs.querySelectorAll('.cz-tab').forEach((t) => t.classList.toggle('active', t.dataset.tab === 'cat'));
-    setMode('customize'); // 창을 먼저 키운다
     clearTimeout(czAnimTimer);
     customizer.classList.remove('hidden', 'cz-out');
     customizer.classList.add('cz-in');
@@ -386,14 +404,12 @@
     if (immediate) {
       customizer.classList.remove('cz-out');
       customizer.classList.add('hidden');
-      if (!collapsed) setMode('normal');
       return;
     }
     customizer.classList.add('cz-out');
     czAnimTimer = setTimeout(() => {
       customizer.classList.remove('cz-out');
       customizer.classList.add('hidden');
-      if (!collapsed) setMode('normal'); // 퇴장이 끝난 뒤 창을 줄인다
     }, CZ_OUT_MS);
   }
 
@@ -424,6 +440,8 @@
     window.overlayAPI.setIgnore(true);
     const isWidget = (el) => !!(el && el.closest && el.closest('.interactive, .cat'));
     window.addEventListener('mousemove', (e) => {
+      // 그립 드래그 중엔 절대 클릭 통과로 전환하지 않는다 (이벤트가 끊기면 드래그가 멈추지 않음)
+      if (handleDragging) { if (ignoring) { ignoring = false; window.overlayAPI.setIgnore(false); } return; }
       const over = isWidget(document.elementFromPoint(e.clientX, e.clientY));
       if (over && ignoring) { ignoring = false; window.overlayAPI.setIgnore(false); }
       else if (!over && !ignoring) { ignoring = true; window.overlayAPI.setIgnore(true); }

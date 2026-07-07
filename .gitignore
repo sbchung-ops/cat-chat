@@ -1,2 +1,5 @@
 node_modules/
 .gstack/
+.vercel/
+dist/
+_qa_*.png
