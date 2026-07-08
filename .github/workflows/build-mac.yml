@@ -15,6 +15,8 @@ jobs:
     # Intel(x64) dmg를 뽑는다. 이 앱은 네이티브 모듈이 없어(순수 JS) 패키징만 하므로,
     # 물량 적은 Intel 러너(macos-13) 대신 물량 많은 Apple Silicon 러너에서 --x64로 크로스 패키징한다.
     runs-on: macos-latest
+    permissions:
+      contents: write   # 태그 푸시 시 Release 생성용
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,7 +35,9 @@ jobs:
         # 서명 안 된 앱이라 최초 실행 시 Gatekeeper 경고가 뜰 수 있음.
         env:
           CSC_IDENTITY_AUTODISCOVERY: "false"
-        run: npm run dist:mac
+        # --publish never: git 태그를 봐도 electron-builder가 자동 publish 시도하지 않도록
+        # (아티팩트 업로드/Release 첨부는 아래 단계가 처리)
+        run: npm run dist:mac -- --publish never
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
