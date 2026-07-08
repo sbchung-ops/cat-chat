@@ -4,3 +4,5 @@ node_modules/
 public/.gstack/
 H7WIWU2.DOCX
 _qa_*.png
+public/rabbit-*-test.html
+scripts/capture-rabbit-*.js

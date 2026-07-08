@@ -256,6 +256,54 @@
     ]
   },
   {
+    "file": "cats/cat_17_rabbit_white_perk.png",
+    "slug": "cat_17_rabbit_white",
+    "name_ko": "흰 토끼",
+    "category": "cats",
+    "source_crop_box": [
+      220,
+      0,
+      820,
+      650
+    ],
+    "size_px": [
+      183,
+      266
+    ]
+  },
+  {
+    "file": "cats/cat_19_rabbit_brown_perk.png",
+    "slug": "cat_19_rabbit_brown",
+    "name_ko": "갈색 토끼",
+    "category": "cats",
+    "source_crop_box": [
+      1320,
+      0,
+      2000,
+      650
+    ],
+    "size_px": [
+      183,
+      267
+    ]
+  },
+  {
+    "file": "cats/cat_21_rabbit_grey_perk.png",
+    "slug": "cat_21_rabbit_grey",
+    "name_ko": "회색 토끼",
+    "category": "cats",
+    "source_crop_box": [
+      2420,
+      0,
+      3120,
+      650
+    ],
+    "size_px": [
+      183,
+      267
+    ]
+  },
+  {
     "file": "accessories/hats/acc_hat_01_chef_hat.png",
     "slug": "acc_hat_01_chef_hat",
     "name_ko": "셰프 모자",

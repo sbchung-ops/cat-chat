@@ -34,8 +34,32 @@
     cat_14_bengal:              { earTop: 0.0604, faceTop: 0.1868, eyeY: 0.3626, headW: 0.5714, headCx: 0.3503, bottom: 0.9670, chinFu: 1.00, neckCx: 0.3457 },
     cat_15_devon_rex:           { earTop: 0.0670, faceTop: 0.1899, eyeY: 0.3799, headW: 0.6667, headCx: 0.3780, bottom: 0.9665, chinFu: 0.85, neckCx: 0.3530 },
     cat_16_turkish_angora:      { earTop: 0.0663, faceTop: 0.1823, eyeY: 0.3481, headW: 0.5862, headCx: 0.4414, bottom: 0.9669, chinFu: 1.00, neckCx: 0.4164, eyeDy: 0.30 },
+    cat_17_rabbit_white:        { earTop: 0.0380, faceTop: 0.2450, eyeY: 0.4450, headW: 0.5600, headCx: 0.4550, bottom: 0.9820, chinFu: 0.90, neckCx: 0.4000, neckW: 0.5600, itemW: 0.5600, hatDy: 0.10 },
+    cat_18_rabbit_white_fold:   { earTop: 0.1250, faceTop: 0.1700, eyeY: 0.3450, headW: 0.4300, headCx: 0.5000, bottom: 0.9920, chinFu: 1.02, neckCx: 0.4010, neckW: 0.5620, itemW: 0.5620, hatDy: 0.18, hatDx: -0.30, displayScale: 0.737 },
+    cat_19_rabbit_brown:        { earTop: 0.0380, faceTop: 0.2450, eyeY: 0.4550, headW: 0.5600, headCx: 0.4550, bottom: 0.9820, chinFu: 0.90, neckCx: 0.4000, neckW: 0.5600, itemW: 0.5600, hatDy: 0.10 },
+    cat_20_rabbit_brown_fold:   { earTop: 0.1250, faceTop: 0.1700, eyeY: 0.3450, headW: 0.4300, headCx: 0.5000, bottom: 0.9920, chinFu: 1.02, neckCx: 0.4010, neckW: 0.5620, itemW: 0.5620, hatDy: 0.18, hatDx: -0.30, displayScale: 0.737 },
+    cat_21_rabbit_grey:         { earTop: 0.0380, faceTop: 0.2450, eyeY: 0.4550, headW: 0.5600, headCx: 0.4550, bottom: 0.9820, chinFu: 0.90, neckCx: 0.4000, neckW: 0.5600, itemW: 0.5600, hatDy: 0.10 },
+    cat_22_rabbit_grey_fold:    { earTop: 0.1250, faceTop: 0.1700, eyeY: 0.3450, headW: 0.4300, headCx: 0.5000, bottom: 0.9920, chinFu: 1.02, neckCx: 0.4010, neckW: 0.5620, itemW: 0.5620, hatDy: 0.18, hatDx: -0.30, displayScale: 0.737 },
   };
   const METRIC_DEFAULT = { earTop: 0.06, faceTop: 0.17, eyeY: 0.36, headW: 0.60, headCx: 0.40, bottom: 0.97, chinFu: 1.0 };
+  const RABBIT_FOLD_HAT_FIT = {
+    acc_hat_01_chef_hat:        { dy: -0.56 },
+    acc_hat_02_beret:           { dy: -0.50, dx: -0.02 },
+    acc_hat_03_blue_beanie:     { dy: -0.62, dx: 0.08, w: 0.90 },
+    acc_hat_04_top_hat:         { dy: -0.56 },
+    acc_hat_05_straw_hat:       { dy: -0.16, dx: 0.04, w: 1.22 },
+    acc_hat_06_aviator_hat:     { dy: -0.35, dx: -0.08, w: 1.24 },
+    acc_hat_07_frog_hat:        { dy: -0.62, dx: -0.04 },
+    acc_hat_08_ski_helmet:      { dy: 0.04, dx: -0.06, w: 1.16 },
+    acc_hat_09_yellow_hard_hat: { dy: -0.60, dx: 0.08 },
+    acc_hat_10_red_cap:         { dy: -0.62, dx: -0.03 },
+    acc_hat_12_wizard_hat:      { dy: -0.34, w: 1.28 },
+  };
+  const RABBIT_FOLD_VARIANTS = {
+    cat_17_rabbit_white: { slug: 'cat_18_rabbit_white_fold', file: 'cats/cat_18_rabbit_white_fold.png', size_px: [239, 257] },
+    cat_19_rabbit_brown: { slug: 'cat_20_rabbit_brown_fold', file: 'cats/cat_20_rabbit_brown_fold.png', size_px: [240, 257] },
+    cat_21_rabbit_grey:  { slug: 'cat_22_rabbit_grey_fold',  file: 'cats/cat_22_rabbit_grey_fold.png',  size_px: [236, 257] },
+  };
   const CAT_ANCHORS = {
     cat_01_korean_shorthair:     { l: [31, 61], r: [66, 61], m: [46, 72], gs: 1.02, ms: 1.00 },
     cat_02_american_shorthair:   { l: [29, 63], r: [64, 63], m: [43, 75], gs: 1.00, ms: 0.98 },
@@ -53,6 +77,12 @@
     cat_14_bengal:               { l: [29, 75], r: [65, 75], m: [45, 81], gs: 0.98, ms: 1.00 },
     cat_15_devon_rex:            { l: [24, 71], r: [60, 71], m: [40, 83], gs: 0.98, ms: 0.98 },
     cat_16_turkish_angora:       { l: [39, 69], r: [75, 69], m: [53, 78], gs: 0.96, ms: 1.00 },
+    cat_17_rabbit_white:         { l: [36, 129], r: [82, 129], m: [55, 148], gs: 0.86, monoS: 1.06, ms: 1.00 },
+    cat_18_rabbit_white_fold:    { l: [42, 91], r: [104, 93], m: [67, 116], gs: 0.837, monoS: 1.03, ms: 1.00 },
+    cat_19_rabbit_brown:         { l: [36, 129], r: [82, 129], m: [55, 148], gs: 0.86, monoS: 1.06, ms: 1.00 },
+    cat_20_rabbit_brown_fold:    { l: [42, 91], r: [104, 93], m: [67, 116], gs: 0.837, monoS: 1.03, ms: 1.00 },
+    cat_21_rabbit_grey:          { l: [36, 129], r: [82, 129], m: [55, 148], gs: 0.86, monoS: 1.06, ms: 1.00 },
+    cat_22_rabbit_grey_fold:     { l: [42, 91], r: [104, 93], m: [67, 116], gs: 0.837, monoS: 1.03, ms: 1.00 },
   };
 
   // ---- 모자: 눈썹선(눈 살짝 위)에 착용선이 오게 → 귀가 모자 안으로 들어가 안 보임 ----
@@ -103,6 +133,22 @@
   };
   const OTHER_Z = { acc_other_06_sprout_pot: 5, acc_other_07_carrot: 6, acc_other_10_broom: 0 };
   const OTHER_FIT = {
+    acc_other_06_sprout_pot: {
+      cat_17_rabbit_white: { w: 1.35 },
+      cat_18_rabbit_white_fold: { w: 1.35 },
+      cat_19_rabbit_brown: { w: 1.35 },
+      cat_20_rabbit_brown_fold: { w: 1.35 },
+      cat_21_rabbit_grey: { w: 1.35 },
+      cat_22_rabbit_grey_fold: { w: 1.35 },
+    },
+    acc_other_07_carrot: {
+      cat_17_rabbit_white: { w: 1.35 },
+      cat_18_rabbit_white_fold: { w: 1.35 },
+      cat_19_rabbit_brown: { w: 1.35 },
+      cat_20_rabbit_brown_fold: { w: 1.35 },
+      cat_21_rabbit_grey: { w: 1.35 },
+      cat_22_rabbit_grey_fold: { w: 1.35 },
+    },
     acc_other_01_round_glasses: {
       cat_01_korean_shorthair:    { dx: 0.01, dy: 0.00, w: 1.02 },
       cat_02_american_shorthair:  { dx: 0.00, dy: 0.03, w: 0.98 },
@@ -184,12 +230,15 @@
 
   // character -> 합성된 고양이 HTML (.cat-figure)
   function catHTML(character) {
-    const catIt = byslug[character && character.cat] || CATS[0];
-    if (!catIt) return '<div class="cat-figure"></div>';
+    const baseCatIt = byslug[character && character.cat] || CATS[0];
+    if (!baseCatIt) return '<div class="cat-figure"></div>';
+    const hatSlug0 = character && character.hat;
+    const useRabbitFold = !!(RABBIT_FOLD_VARIANTS[baseCatIt.slug] && ((hatSlug0 && hatSlug0 !== 'acc_hat_11_flower') || (character && character.forceRabbitFold)));
+    const catIt = useRabbitFold ? RABBIT_FOLD_VARIANTS[baseCatIt.slug] : baseCatIt;
     const [cw, ch] = catIt.size_px;
-    const Hc = CAT_DISPLAY_H;
-    const Wc = Hc * (cw / ch);
     const M = CAT_METRICS[catIt.slug] || METRIC_DEFAULT;
+    const Hc = CAT_DISPLAY_H * (M.displayScale || 1);
+    const Wc = Hc * (cw / ch);
 
     // 실측 기준점 (렌더 px)
     const headWpx = M.headW * Wc;
@@ -205,9 +254,8 @@
 
     // 모자를 쓰면 귀를 제거: "머리 폭 구간"만 위에서 파낸다 (꼬리·등털은 그대로, 단면은 모자가 덮음)
     // 단, keepEars 모자(탑햇·셰프)는 귀를 남긴다.
-    const hatSpec0 = character && character.hat && byslug[character.hat]
-      ? (HAT_SPECS[character.hat] || {}) : null;
-    const removeEars = !!(hatSpec0 && !hatSpec0.keepEars);
+    const hatSpec0 = hatSlug0 && byslug[hatSlug0] ? (HAT_SPECS[hatSlug0] || {}) : null;
+    const removeEars = !!(hatSpec0 && !hatSpec0.keepEars && !useRabbitFold);
     let catClip = '';
     if (removeEars) {
       const cY = ((M.faceTop + 0.35 * (M.eyeY - M.faceTop)) * 100).toFixed(1);
@@ -223,7 +271,7 @@
     if (neckSlug && byslug[neckSlug]) {
       const it = byslug[neckSlug];
       const spec = NECK_SPECS[neckSlug] || { w: 0.55, oy: 0.20 };
-      const W = headWpx * spec.w;
+      const W = (M.neckW || M.headW) * Wc * spec.w;
       const H = W * (it.size_px[1] / it.size_px[0]);
       const neckCxPx = (M.neckCx || M.headCx) * Wc; // 목 중심(머리 중심과 다를 수 있음)
       layers += layerTag(it, neckCxPx - W / 2, chinPx - spec.oy * H, W, H, 3);
@@ -234,11 +282,12 @@
     if (itemSlug && byslug[itemSlug]) {
       const it = byslug[itemSlug];
       const spec = OTHER_SPECS[itemSlug] || { at: 'eye', w: 0.5, oy: 0.5, dx: 0 };
-      const fit = (OTHER_FIT[itemSlug] && OTHER_FIT[itemSlug][catIt.slug]) || {};
-      const anchor = CAT_ANCHORS[catIt.slug];
+      const fit = (OTHER_FIT[itemSlug] && (OTHER_FIT[itemSlug][catIt.slug] || OTHER_FIT[itemSlug][baseCatIt.slug])) || {};
+      const anchor = CAT_ANCHORS[catIt.slug] || CAT_ANCHORS[baseCatIt.slug];
       const scale = Hc / ch;
       let layerExtra = '';
-      let W = headWpx * spec.w * (fit.w || 1);
+      const itemWpx = (M.itemW || M.headW) * Wc;
+      let W = itemWpx * spec.w * (fit.w || 1);
       let H = W * (it.size_px[1] / it.size_px[0]);
       let x = cx + (((fit.dx != null ? fit.dx : (spec.dx || 0))) + (spec.at === 'eye' ? (M.eyeDx || 0) : 0)) * headWpx - W / 2;
       let y = 0;
@@ -258,7 +307,7 @@
         y = ((ly + ry) / 2) - H * lensCy;
       } else if (anchor && itemSlug === 'acc_other_02_monocle') {
         const eyeGap = Math.max(1, (anchor.r[0] - anchor.l[0]) * scale);
-        W = eyeGap * 1.06 * (anchor.gs || 1);
+        W = eyeGap * 1.06 * (anchor.monoS || anchor.gs || 1);
         H = W * (it.size_px[1] / it.size_px[0]);
         x = anchor.r[0] * scale - W * 0.50;
         y = anchor.r[1] * scale - H * 0.42;
@@ -279,11 +328,11 @@
     }
 
     // 모자 (맨 위: 귀를 완전히 덮음)
-    const hatSlug = character && character.hat;
+    const hatSlug = hatSlug0;
     if (hatSlug && byslug[hatSlug]) {
       const it = byslug[hatSlug];
       const spec = HAT_SPECS[hatSlug] || { w: 1.12, oy: 0.84 };
-      const fit = (M.hatFit && M.hatFit[hatSlug]) || {}; // 고양이×모자 개별 보정
+      const fit = Object.assign({}, (M.hatFit && M.hatFit[hatSlug]) || {}, useRabbitFold ? (RABBIT_FOLD_HAT_FIT[hatSlug] || {}) : {}); // 고양이×모자 개별 보정
       const W = headWpx * spec.w * (M.hatW || 1) * (fit.w || 1);
       const H = W * (it.size_px[1] / it.size_px[0]);
       const ax = spec.ax != null ? spec.ax : 0.5; // 머리가 들어가는 지점(챙 있는 모자는 크라운 중심)

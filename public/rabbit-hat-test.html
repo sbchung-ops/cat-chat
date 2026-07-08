@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Rabbit Hat Test</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 18px;
+      background: #efe8dc;
+      color: #4f493f;
+      font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    }
+    h1 { margin: 0 0 12px; font-size: 18px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(120px, 1fr));
+      gap: 8px;
+    }
+    .card {
+      min-height: 112px;
+      padding: 6px;
+      border: 1px solid #d4c3a5;
+      border-radius: 8px;
+      background: #fffdf8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .stage {
+      height: 84px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .label {
+      width: 100%;
+      margin-top: 3px;
+      font-size: 10px;
+      line-height: 1.25;
+      color: #716757;
+      text-align: center;
+      word-break: keep-all;
+    }
+    .cat-figure {
+      position: relative;
+      margin: 0 auto;
+      filter: drop-shadow(0 3px 4px rgba(120, 100, 80, 0.22));
+    }
+    .cat-layer { position: absolute; image-rendering: auto; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <h1>Rabbit Hat Test</h1>
+  <main class="grid" id="grid"></main>
+  <script src="cat.js"></script>
+  <script>
+    const cats = [
+      ['cat_17_rabbit_white', 'white'],
+      ['cat_19_rabbit_brown', 'brown'],
+      ['cat_21_rabbit_grey', 'grey'],
+    ];
+    const hats = [
+      [null, 'none'],
+      ['acc_hat_11_flower', 'flower'],
+      ['acc_hat_01_chef_hat', 'chef'],
+      ['acc_hat_02_beret', 'beret'],
+      ['acc_hat_03_blue_beanie', 'beanie'],
+      ['acc_hat_04_top_hat', 'top hat'],
+      ['acc_hat_05_straw_hat', 'straw'],
+      ['acc_hat_06_aviator_hat', 'aviator'],
+      ['acc_hat_07_frog_hat', 'frog'],
+      ['acc_hat_08_ski_helmet', 'ski'],
+      ['acc_hat_09_yellow_hard_hat', 'hard hat'],
+      ['acc_hat_10_red_cap', 'red cap'],
+      ['acc_hat_12_wizard_hat', 'wizard'],
+    ];
+
+    fetch('assets/manifest.json')
+      .then((r) => r.json())
+      .then((list) => {
+        window.CatRender.setCatalog(list);
+        const grid = document.getElementById('grid');
+        grid.innerHTML = hats.map(([hat, hatName]) =>
+          cats.map(([cat, catName]) => `
+            <section class="card" data-cat="${cat}" data-hat="${hat || ''}">
+              <div class="stage">${window.CatRender.catHTML({ cat, hat, neck: null, item: null })}</div>
+              <div class="label">${catName} / ${hatName}</div>
+            </section>
+          `).join('')
+        ).join('');
+        document.title = 'Rabbit Hat Test Ready';
+      });
+  </script>
+</body>
+</html>
