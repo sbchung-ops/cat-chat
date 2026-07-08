@@ -33,6 +33,7 @@
       <div class="dock-tools">
         <span class="dock-status" title="접속 중" aria-label="접속 중인 고양이 수"><span class="online-dot"></span><span id="onlineCount">0</span></span>
         <span class="dock-sep"></span>
+        <button class="tool-btn log-tool" id="logBtn" title="채팅 기록" aria-label="채팅 기록">🗂</button>
         <button class="tool-btn customize-tool" id="settingsBtn" title="꾸미기" aria-label="꾸미기">✦</button>
         <button class="tool-btn quit" id="quitBtn" title="종료" aria-label="종료">×</button>
       </div>
@@ -40,6 +41,16 @@
         <input type="text" id="chatInput" maxlength="200" placeholder="여기에 냥냥…" autocomplete="off" />
         <button type="button" class="chat-paw-toggle" id="collapseBtn" title="접기" aria-label="채팅 접기"><span aria-hidden="true">🐾</span></button>
       </form>
+    </div>
+
+    <!-- 채팅 기록 패널 (카톡처럼 지난 대화 보기) -->
+    <div class="log-panel interactive hidden" id="logPanel">
+      <div class="log-head">
+        <span class="log-title">🗂 채팅 기록</span>
+        <button type="button" class="log-close" id="logClose" title="닫기" aria-label="닫기">✕</button>
+      </div>
+      <div class="log-body" id="logBody"></div>
+      <div class="log-foot">매일 오전 5시에 기록이 초기화돼요</div>
     </div>
 
     <!-- 꾸미기 패널 -->

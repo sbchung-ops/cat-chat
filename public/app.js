@@ -25,6 +25,10 @@
   const czRandom = $('czRandom');
   const czSave = $('czSave');
   const czClose = $('czClose');
+  const logBtn = $('logBtn');
+  const logPanel = $('logPanel');
+  const logBody = $('logBody');
+  const logClose = $('logClose');
 
   let ws = null;
   let myId = null;
@@ -33,6 +37,10 @@
 
   let collapsed = false;
   let unseen = 0;
+
+  // 채팅 기록: 서버가 welcome으로 보내준 지난 대화 + 이후 실시간 메시지 (매일 5시 서버에서 초기화)
+  let chatHistory = [];
+  const CHAT_HISTORY_MAX = 300;
 
   // ---- 프로필 ----
   function loadProfile() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
@@ -162,6 +170,7 @@
     collapsed = true;
     cancelNyanEvent(); // 접으면 이벤트도 정리
     closeCustomizer(true); // 접힘이 우선: 꾸미기는 즉시 숨김
+    closeLog(true); // 기록 패널도 즉시 숨김
     overlay.classList.remove('ui-enter');
     overlay.classList.add('ui-exit');
     clearTimeout(uiAnimTimer);
@@ -261,6 +270,9 @@
         profile.character = msg.character;
         editCharacter = { ...msg.character };
         saveProfile(profile);
+        // 지난 대화 기록 받기 (재접속 시에도 서버 기준으로 다시 맞춘다)
+        chatHistory = Array.isArray(msg.history) ? msg.history.slice(-CHAT_HISTORY_MAX) : [];
+        if (isLogOpen()) renderLog();
         catsRow.innerHTML = '';
         catEls.clear();
         // 내 고양이를 항상 맨 왼쪽에
@@ -283,6 +295,21 @@
         if (collapsed && msg.userId !== myId) bumpUnseen();
         // 냥냥 이벤트는 '내가' 보냈을 때만 내 화면에 재생 (남의 화면을 갑자기 덮지 않게)
         if (msg.userId === myId && NYAN_RE.test(msg.text)) playNyanEvent();
+        // 채팅 기록에 적재 (닉네임·캐릭터는 서버가 함께 보내주며, 없으면 현재 고양이에서 보완)
+        const el = catEls.get(msg.userId);
+        recordChat({
+          userId: msg.userId,
+          nickname: msg.nickname || (el ? el.nick.textContent.replace(/\s*\(나\)\s*$/, '') : '냥이'),
+          character: msg.character || null,
+          text: msg.text,
+          ts: msg.ts || Date.now(),
+        });
+        return;
+      }
+      if (msg.type === 'history-cleared') {
+        chatHistory = [];
+        if (isLogOpen()) renderLog();
+        toast('채팅 기록이 초기화됐어요', 'leave');
         return;
       }
       if (msg.type === 'typing') { setTyping(msg.userId, msg.isTyping); return; }
@@ -389,6 +416,7 @@
   let czAnimTimer = null;
 
   function openCustomizer() {
+    closeLog(true); // 두 패널이 겹치지 않게 기록 패널은 즉시 닫기
     editCharacter = { ...(profile.character || window.CatRender.randomCharacter()) };
     nickEdit.value = profile.nickname || '';
     activeTab = 'cat';
@@ -430,6 +458,75 @@
     }
     closeCustomizer();
   });
+
+  // ---- 채팅 기록 패널 ----
+  function fmtTime(ts) {
+    const d = new Date(ts);
+    let h = d.getHours();
+    const m = d.getMinutes();
+    const ap = h < 12 ? '오전' : '오후';
+    h = h % 12; if (h === 0) h = 12;
+    return `${ap} ${h}:${String(m).padStart(2, '0')}`;
+  }
+
+  function logRowHTML(e) {
+    const mine = e.userId === myId;
+    const cat = e.character && e.character.cat;
+    const av = cat && window.CatRender.thumb ? window.CatRender.thumb(cat) : '';
+    return `<div class="log-row${mine ? ' mine' : ''}">`
+      + `<div class="log-av">${av ? `<img src="${av}" alt="">` : '🐱'}</div>`
+      + `<div class="log-msg">`
+      + `<div class="log-meta"><span class="log-name">${escapeHtml(e.nickname)}</span>`
+      + `<span class="log-time">${fmtTime(e.ts)}</span></div>`
+      + `<div class="log-text">${escapeHtml(e.text)}</div>`
+      + `</div></div>`;
+  }
+
+  function isLogOpen() { return !logPanel.classList.contains('hidden') && !logPanel.classList.contains('log-out'); }
+
+  function renderLog() {
+    if (!chatHistory.length) {
+      logBody.innerHTML = '<div class="log-empty">아직 나눈 대화가 없어요 🐾<br>오늘의 첫 냥냥을 남겨보세요</div>';
+      return;
+    }
+    logBody.innerHTML = chatHistory.map(logRowHTML).join('');
+    logBody.scrollTop = logBody.scrollHeight;
+  }
+
+  // 실시간 메시지 도착: 기록에 쌓고, 패널이 열려 있으면 한 줄만 이어붙인다
+  function recordChat(e) {
+    chatHistory.push(e);
+    if (chatHistory.length > CHAT_HISTORY_MAX) chatHistory.shift();
+    if (!isLogOpen()) return;
+    const empty = logBody.querySelector('.log-empty');
+    if (empty) empty.remove();
+    const atBottom = logBody.scrollHeight - logBody.scrollTop - logBody.clientHeight < 48;
+    logBody.insertAdjacentHTML('beforeend', logRowHTML(e));
+    if (atBottom) logBody.scrollTop = logBody.scrollHeight;
+  }
+
+  const LOG_OUT_MS = 180, LOG_IN_MS = 280;
+  let logAnimTimer = null;
+
+  function openLog() {
+    closeCustomizer(true); // 두 패널이 겹치지 않게 꾸미기는 즉시 닫기
+    renderLog();
+    clearTimeout(logAnimTimer);
+    logPanel.classList.remove('hidden', 'log-out');
+    logPanel.classList.add('log-in');
+    logAnimTimer = setTimeout(() => { logPanel.classList.remove('log-in'); logBody.scrollTop = logBody.scrollHeight; }, LOG_IN_MS);
+  }
+  function closeLog(immediate) {
+    if (logPanel.classList.contains('hidden')) return;
+    clearTimeout(logAnimTimer);
+    logPanel.classList.remove('log-in');
+    if (immediate) { logPanel.classList.remove('log-out'); logPanel.classList.add('hidden'); return; }
+    logPanel.classList.add('log-out');
+    logAnimTimer = setTimeout(() => { logPanel.classList.remove('log-out'); logPanel.classList.add('hidden'); }, LOG_OUT_MS);
+  }
+
+  logBtn.addEventListener('click', () => { if (isLogOpen()) closeLog(); else openLog(); });
+  logClose.addEventListener('click', () => closeLog());
 
   // ---- 종료 ----
   if (quitBtn) {

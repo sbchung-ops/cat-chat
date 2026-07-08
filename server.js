@@ -129,6 +129,40 @@ function broadcast(payload, exceptWs) {
   }
 }
 
+// ---- 채팅 로그 (DB 없이 메모리 보관) ----
+// 카톡처럼 지난 대화를 볼 수 있게 최근 메시지를 서버 메모리에 쌓아둔다.
+// 새로 접속하는 유저는 welcome에 담긴 history로 지난 대화를 받는다.
+// 매일 오전 5시(KST)에 전부 비운다 (DB가 없으므로 하루치만 유지).
+const CHAT_LOG_MAX = 300;
+let chatLog = [];
+
+function pushLog(entry) {
+  chatLog.push(entry);
+  if (chatLog.length > CHAT_LOG_MAX) chatLog.splice(0, chatLog.length - CHAT_LOG_MAX);
+}
+
+// 다음 오전 5시(KST = UTC+9, 서머타임 없음)까지 남은 밀리초
+function msUntilNext5amKST() {
+  const DAY = 24 * 3600 * 1000;
+  const KST_OFFSET = 9 * 3600 * 1000;
+  const FIVE_AM = 5 * 3600 * 1000;
+  const kstNow = Date.now() + KST_OFFSET;
+  const sinceKstMidnight = ((kstNow % DAY) + DAY) % DAY;
+  let wait = FIVE_AM - sinceKstMidnight;
+  if (wait <= 0) wait += DAY;
+  return wait;
+}
+
+function scheduleDailyClear() {
+  setTimeout(() => {
+    chatLog = [];
+    broadcast({ type: 'history-cleared' });
+    console.log('[chat-log] 오전 5시(KST) 채팅 기록 초기화');
+    scheduleDailyClear();
+  }, msUntilNext5amKST());
+}
+scheduleDailyClear();
+
 const wss = new WebSocketServer({ server });
 // 프록시(Render/Cloudflare) 뒤에서는 소켓이 거칠게 끊기며 error 이벤트가 흔하다.
 // 리스너가 없으면 Node가 프로세스를 통째로 죽이므로 반드시 삼켜준다.
@@ -165,7 +199,7 @@ wss.on('connection', (ws) => {
       users.set(userId, user);
 
       const roster = [...users.entries()].map(([id, u]) => publicUser(id, u));
-      ws.send(JSON.stringify({ type: 'welcome', userId, nickname, character, roster }));
+      ws.send(JSON.stringify({ type: 'welcome', userId, nickname, character, roster, history: chatLog }));
       broadcast({ type: 'user-joined', user: publicUser(userId, user) }, ws);
       return;
     }
@@ -177,7 +211,11 @@ wss.on('connection', (ws) => {
       const text = typeof data.text === 'string' ? data.text.trim().slice(0, 200) : '';
       if (!text) return;
       user.typing = false;
-      broadcast({ type: 'chat', userId, text, ts: Date.now() });
+      const ts = Date.now();
+      // 로그/브로드캐스트에 닉네임·캐릭터를 함께 담아, 보낸 사람이 나가거나
+      // 이름을 바꿔도 기록에는 당시 이름·고양이가 그대로 남게 한다.
+      pushLog({ userId, nickname: user.nickname, character: user.character, text, ts });
+      broadcast({ type: 'chat', userId, nickname: user.nickname, character: user.character, text, ts });
       return;
     }
 
