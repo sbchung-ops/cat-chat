@@ -1,0 +1,57 @@
+name: Build macOS (Intel)
+
+# 실행 방법:
+#  1) Actions 탭 → "Build macOS (Intel)" → Run workflow (수동 실행)
+#  2) 또는 v1.0.0 같은 태그를 푸시하면 자동 실행 + Release에 산출물 업로드
+#     git tag v1.0.0 && git push origin v1.0.0
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-mac-intel:
+    # Intel(x64) dmg를 뽑는다. 이 앱은 네이티브 모듈이 없어(순수 JS) 패키징만 하므로,
+    # 물량 적은 Intel 러너(macos-13) 대신 물량 많은 Apple Silicon 러너에서 --x64로 크로스 패키징한다.
+    runs-on: macos-latest
+    permissions:
+      contents: write   # 태그 푸시 시 Release 생성용
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build macOS Intel (dmg + zip)
+        # 코드사이닝은 하지 않음(CSC_IDENTITY_AUTODISCOVERY=false).
+        # 서명 안 된 앱이라 최초 실행 시 Gatekeeper 경고가 뜰 수 있음.
+        env:
+          CSC_IDENTITY_AUTODISCOVERY: "false"
+        # --publish never: git 태그를 봐도 electron-builder가 자동 publish 시도하지 않도록
+        # (아티팩트 업로드/Release 첨부는 아래 단계가 처리)
+        run: npm run dist:mac -- --publish never
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: catchat-mac-intel
+          path: |
+            dist/*.dmg
+            dist/*.zip
+          if-no-files-found: error
+
+      - name: Attach to Release (태그 푸시 시)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.dmg
+            dist/*.zip

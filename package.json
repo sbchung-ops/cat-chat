@@ -2,13 +2,17 @@
   "name": "cat-chat",
   "version": "1.0.0",
   "description": "바탕화면 하단 고정형 고양이 실시간 채팅 데스크톱 오버레이",
+  "author": "mobidays",
   "main": "electron-main.js",
   "scripts": {
     "start": "node server.js",
     "desktop": "electron .",
     "server": "node server.js",
-    "pack:win": "electron-builder --win portable",
-    "dist:win": "electron-builder --win nsis portable"
+    "patch:builder": "node build/patch-portable-excludes.js",
+    "pack:win": "npm run patch:builder && electron-builder --win portable",
+    "dist:win": "npm run patch:builder && electron-builder --win nsis portable",
+    "pack:mac": "electron-builder --mac zip --x64",
+    "dist:mac": "electron-builder --mac dmg zip --x64"
   },
   "dependencies": {
     "ws": "^8.18.0"
@@ -41,13 +45,50 @@
         "nsis"
       ]
     },
+    "mac": {
+      "category": "public.app-category.social-networking",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "냥냥채팅-mac-intel.${ext}"
+    },
+    "dmg": {
+      "title": "냥냥 채팅 (Intel)"
+    },
     "nsis": {
       "oneClick": true,
       "perMachine": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": true,
-      "artifactName": "냥냥채팅-설치.exe"
+      "artifactName": "냥냥채팅-설치.exe",
+      "preCompressedFileExtensions": [
+        ".avi",
+        ".mov",
+        ".m4v",
+        ".mp4",
+        ".m4p",
+        ".qt",
+        ".mkv",
+        ".webm",
+        ".vmdk",
+        ".DOCX",
+        ".docx"
+      ]
+    },
+    "portable": {
+      "artifactName": "냥냥채팅-포터블.exe"
     }
   }
 }
