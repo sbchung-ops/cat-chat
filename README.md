@@ -40,16 +40,35 @@ npm run desktop  # 바탕화면 오버레이 실행
 
 현재 PoC 서버: `https://cat-chat-y05q.onrender.com`
 
-친구들이 참여하는 방법:
-- **설치형 앱 (권장)**: `냥냥채팅-설치.exe` 실행 → 자동 설치 후 실행, 서버에 자동 접속
-  (빌드: `npm run pack:win` 또는 `npx electron-builder --win nsis`)
+친구들이 참여하는 방법 (Windows):
+- **포터블 앱 (권장)**: `냥냥채팅-포터블.exe` 더블클릭 → 설치 없이 바로 실행, 서버에 자동 접속
+- **설치형 앱**: `냥냥채팅-설치.exe` 실행 → 자동 설치 후 실행
+- **압축본**: `냥냥채팅-windows.zip` 압축 해제 → 폴더 안 `냥냥 채팅.exe` 실행
+  (회사 PC 등 .exe 다운로드가 막힌 환경 대비용)
 - **브라우저**: 배포 URL을 그냥 열면 됩니다 (설치 불필요)
 - **개발 모드로 원격 서버 접속**:
   ```powershell
   $env:CATCHAT_SERVER="https://cat-chat-y05q.onrender.com"; npm run desktop
   ```
 
-참고: Render 무료 플랜은 15분간 접속이 없으면 잠들었다가 첫 접속 시 ~30초 걸려 깨어납니다.
+> ⚠️ **처음 실행 시 파란 SmartScreen 경고**가 뜹니다(코드 서명 안 된 앱이라 정상).
+> `추가 정보` → `실행`을 누르면 됩니다. 친구에게 이 절차를 함께 알려주세요.
+
+> Render 무료 플랜은 15분간 접속이 없으면 잠들었다가 첫 접속 시 ~30초 걸려 깨어납니다.
+> (그동안 고양이가 안 보여도 잠시 기다리면 자동 접속됩니다.)
+
+### Windows 빌드 (배포자용)
+
+```powershell
+npm run dist:win   # 포터블 + 설치본 동시 빌드 → dist\ 에 생성
+```
+
+이 PC는 회사 보안 에이전트가 폴더마다 랜덤 이름의 숨김 `*.DOCX` 카나리아 파일을 잠깐씩
+떨궈서, electron-builder가 앱을 7za로 압축할 때 그 파일이 끼면 `Cannot open 1 file`로
+빌드가 깨진다. 이를 7za 제외(`-xr!*.DOCX`)로 우회한다:
+- **설치본(nsis)**: `package.json`의 `build.nsis.preCompressedFileExtensions`에 `.DOCX/.docx` 추가 (정식 옵션)
+- **포터블**: 옵션 스키마가 이 키를 안 받아, `build/patch-portable-excludes.js`가 빌드 직전
+  app-builder-lib 내부 기본 제외 목록에 DOCX를 주입 (win 빌드 스크립트가 자동 실행, 멱등)
 
 ## 구조
 
