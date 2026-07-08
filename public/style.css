@@ -396,8 +396,9 @@ html, body {
 
 /* ---------- 채팅 기록 패널 (카톡식 대화 목록) ---------- */
 .log-panel {
-  position: absolute; right: 16px; bottom: 60px;
-  width: 330px; height: 500px; display: flex; flex-direction: column;
+  /* 도크(입력바 + 툴 버튼 ≈ 90px) 위로 띄워, 꾸미기·대화 버튼을 가리지 않게 한다 */
+  position: absolute; right: 16px; bottom: 116px;
+  width: 330px; height: min(500px, calc(100vh - 140px)); display: flex; flex-direction: column;
   border: 1.5px solid var(--line);
   border-radius: 22px;
   background: var(--ivory);
