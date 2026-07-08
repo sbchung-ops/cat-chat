@@ -12,8 +12,9 @@ on:
 
 jobs:
   build-mac-intel:
-    # Intel(x64) 바이너리를 뽑기 위해 Intel 러너(macos-13) 사용
-    runs-on: macos-13
+    # Intel(x64) dmg를 뽑는다. 이 앱은 네이티브 모듈이 없어(순수 JS) 패키징만 하므로,
+    # 물량 적은 Intel 러너(macos-13) 대신 물량 많은 Apple Silicon 러너에서 --x64로 크로스 패키징한다.
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
