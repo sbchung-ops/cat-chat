@@ -1,5 +1,6 @@
 (function () {
   const BUBBLE_LIFETIME = 12000;
+  const MAX_BUBBLES = 2; // 고양이 한 마리가 연달아 말하면 말풍선을 이만큼까지 쌓아 보여준다
   const STORAGE_KEY = 'cat-chat-profile';
   const OVERLAY = !!(window.overlayAPI && window.overlayAPI.isOverlay);
 
@@ -33,7 +34,6 @@
   let ws = null;
   let myId = null;
   const catEls = new Map();
-  const bubbleTimers = new Map();
 
   let collapsed = false;
   let unseen = 0;
@@ -62,7 +62,6 @@
     root.innerHTML = `
       <div class="bubble-area">
         <div class="typing-bubble hidden"><span></span><span></span><span></span></div>
-        <div class="bubble hidden"><span class="bubble-text"></span></div>
       </div>
       ${window.CatRender.catHTML(user.character)}
       <div class="cat-nick">${escapeHtml(user.nickname)}${user.userId === myId ? ' <em>(나)</em>' : ''}</div>
@@ -71,8 +70,7 @@
     catEls.set(user.userId, {
       root,
       figureWrap: root,
-      bubble: root.querySelector('.bubble'),
-      bubbleText: root.querySelector('.bubble-text'),
+      bubbleArea: root.querySelector('.bubble-area'),
       typingBubble: root.querySelector('.typing-bubble'),
       nick: root.querySelector('.cat-nick'),
     });
@@ -95,8 +93,6 @@
     const el = catEls.get(userId);
     if (!el) return;
     catEls.delete(userId);
-    clearTimeout(bubbleTimers.get(userId));
-    bubbleTimers.delete(userId);
     el.root.classList.add('leave');
     setTimeout(() => el.root.remove(), 350);
     updateCount();
@@ -105,21 +101,34 @@
   function updateCount() { onlineCount.textContent = catEls.size; }
 
   // ---- 말풍선 ----
+  // 말풍선은 메시지마다 새로 만들어 쌓는다. 연달아 말하면 최대 MAX_BUBBLES개까지
+  // 함께 보이고(최신이 아래), 넘치면 가장 오래된 것부터 지운다.
+  function expireBubble(el, bubble) {
+    clearTimeout(bubble._timer);
+    bubble.remove();
+    // 이 고양이의 말풍선이 다 사라졌을 때만 말하기 상태 해제
+    if (!el.bubbleArea.querySelector('.bubble')) el.root.classList.remove('speaking');
+  }
+
   function showBubble(userId, text) {
     const el = catEls.get(userId);
     if (!el) return;
     setTyping(userId, false);
-    el.bubbleText.textContent = text;
-    el.bubble.classList.remove('hidden', 'pop');
-    void el.bubble.offsetWidth;
-    el.bubble.classList.add('pop');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble pop';
+    const span = document.createElement('span');
+    span.className = 'bubble-text';
+    span.textContent = text;
+    bubble.appendChild(span);
+    el.bubbleArea.appendChild(bubble); // flex column이라 뒤에 붙일수록 아래(고양이 쪽)
+
+    const bubbles = el.bubbleArea.querySelectorAll('.bubble');
+    for (let i = 0; i < bubbles.length - MAX_BUBBLES; i++) expireBubble(el, bubbles[i]);
+
     document.querySelectorAll('.cat.speaking').forEach((c) => c.classList.remove('speaking'));
     el.root.classList.add('speaking');
-    clearTimeout(bubbleTimers.get(userId));
-    bubbleTimers.set(userId, setTimeout(() => {
-      el.bubble.classList.add('hidden');
-      el.root.classList.remove('speaking');
-    }, BUBBLE_LIFETIME));
+    bubble._timer = setTimeout(() => expireBubble(el, bubble), BUBBLE_LIFETIME);
   }
 
   function setTyping(userId, isTyping) {
