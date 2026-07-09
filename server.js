@@ -129,16 +129,84 @@ function broadcast(payload, exceptWs) {
   }
 }
 
-// ---- 채팅 로그 (DB 없이 메모리 보관) ----
+// ---- 채팅 로그 (메모리 + Upstash Redis 백업) ----
 // 카톡처럼 지난 대화를 볼 수 있게 최근 메시지를 서버 메모리에 쌓아둔다.
 // 새로 접속하는 유저는 welcome에 담긴 history로 지난 대화를 받는다.
-// 매일 오전 5시(KST)에 전부 비운다 (DB가 없으므로 하루치만 유지).
+// 매일 오전 5시(KST)에 전부 비운다 (하루치만 유지).
+//
+// Render 무료 플랜은 트래픽이 끊기면 프로세스를 내리고, 재배포 때도 재시작되므로
+// 메모리만으로는 5시가 아닌데도 로그가 날아간다. 그래서 Upstash Redis(REST)에
+// 로그를 백업해 두고 부팅 시 복원한다. 환경변수가 없으면(로컬/Electron) 메모리만 쓴다.
 const CHAT_LOG_MAX = 300;
 let chatLog = [];
+
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+async function redis(command) {
+  const res = await fetch(REDIS_URL, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(command),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.result;
+}
+
+// "채팅 하루"는 KST 오전 5시에 시작한다. 날짜별 키를 쓰면 서버가 5시에 잠들어 있어도
+// 깨어났을 때 새 날짜 키(=빈 로그)를 읽게 되어 초기화가 저절로 지켜진다.
+function chatDayKey() {
+  const kstChatDay = new Date(Date.now() + (9 - 5) * 3600 * 1000);
+  return `catchat:log:${kstChatDay.toISOString().slice(0, 10)}`;
+}
+
+// 저장은 1초 디바운스: 메시지 폭주 시에도 Redis 명령 수를 아낀다 (무료 한도 보호)
+let saveTimer = null;
+function scheduleSave() {
+  if (!REDIS_URL || !REDIS_TOKEN || saveTimer) return;
+  saveTimer = setTimeout(saveLog, 1000);
+}
+
+async function saveLog() {
+  saveTimer = null;
+  try {
+    // TTL 25시간: 어제 키는 손대지 않아도 알아서 사라진다
+    await redis(['SET', chatDayKey(), JSON.stringify(chatLog), 'EX', '90000']);
+  } catch (e) {
+    console.error('[chat-log] Redis 저장 실패:', e.message);
+  }
+}
+
+// 부팅 시 오늘 로그 복원. welcome은 이 프라미스를 기다렸다가 보낸다 —
+// 절전에서 깨어난 직후 첫 접속자가 빈 history를 받는 걸 막는다.
+const logRestored = (async () => {
+  if (!REDIS_URL || !REDIS_TOKEN) return;
+  try {
+    const raw = await redis(['GET', chatDayKey()]);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (Array.isArray(saved)) {
+      // 복원 중 도착한 새 메시지가 있으면 뒤에 이어 붙인다
+      chatLog = [...saved, ...chatLog].slice(-CHAT_LOG_MAX);
+      console.log(`[chat-log] Redis에서 ${saved.length}개 메시지 복원`);
+    }
+  } catch (e) {
+    console.error('[chat-log] Redis 복원 실패:', e.message);
+  }
+})();
+
+// 재배포/절전 진입 시 Render가 SIGTERM을 보낸다: 디바운스 대기 중인 저장을 마저 한다
+process.on('SIGTERM', () => {
+  const pending = saveTimer ? (clearTimeout(saveTimer), saveLog()) : Promise.resolve();
+  pending.finally(() => process.exit(0));
+});
 
 function pushLog(entry) {
   chatLog.push(entry);
   if (chatLog.length > CHAT_LOG_MAX) chatLog.splice(0, chatLog.length - CHAT_LOG_MAX);
+  scheduleSave();
 }
 
 // 다음 오전 5시(KST = UTC+9, 서머타임 없음)까지 남은 밀리초
@@ -156,6 +224,8 @@ function msUntilNext5amKST() {
 function scheduleDailyClear() {
   setTimeout(() => {
     chatLog = [];
+    // Redis는 지울 필요 없다: 5시부터는 chatDayKey()가 새 날짜 키를 가리키고,
+    // 어제 키는 TTL로 알아서 만료된다.
     broadcast({ type: 'history-cleared' });
     console.log('[chat-log] 오전 5시(KST) 채팅 기록 초기화');
     scheduleDailyClear();
@@ -199,7 +269,12 @@ wss.on('connection', (ws) => {
       users.set(userId, user);
 
       const roster = [...users.entries()].map(([id, u]) => publicUser(id, u));
-      ws.send(JSON.stringify({ type: 'welcome', userId, nickname, character, roster, history: chatLog }));
+      // 절전에서 막 깨어난 서버라면 Redis 복원이 끝난 뒤에 history를 보낸다
+      logRestored.then(() => {
+        if (ws.readyState === ws.OPEN) {
+          ws.send(JSON.stringify({ type: 'welcome', userId, nickname, character, roster, history: chatLog }));
+        }
+      });
       broadcast({ type: 'user-joined', user: publicUser(userId, user) }, ws);
       return;
     }
